@@ -1,0 +1,45 @@
+﻿@page "/tutors"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using FSDProject1.Domain
+@using FSDProject1.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="tutors/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Tutors">
+    <PropertyColumn Property="tutors => tutors.Name" />
+    <PropertyColumn Property="tutors => tutors.Qualification" />
+    <PropertyColumn Property="tutors => tutors.Experience" />
+    <PropertyColumn Property="tutors => tutors.HourlyRate" />
+    <PropertyColumn Property="tutors => tutors.Rating" />
+    <PropertyColumn Property="tutors => tutors.DateCreated" />
+    <PropertyColumn Property="tutors => tutors.DateUpdated" />
+    <PropertyColumn Property="tutors => tutors.CreatedBy" />
+    <PropertyColumn Property="tutors => tutors.UpdatedBy" />
+    <PropertyColumn Property="tutors => tutors.StudentUserId" />
+
+    <TemplateColumn Context="tutors">
+        <a href="@($"tutors/edit?tutorid={tutors.TutorId}")">Edit</a> |
+        <a href="@($"tutors/details?tutorid={tutors.TutorId}")">Details</a> |
+        <a href="@($"tutors/delete?tutorid={tutors.TutorId}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private FSDProject1Context context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

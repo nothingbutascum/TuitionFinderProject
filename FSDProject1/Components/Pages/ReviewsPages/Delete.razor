@@ -1,0 +1,79 @@
+﻿@page "/reviews/delete"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Reviews</h2>
+    <hr />
+    @if (reviews is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Rating</dt>
+            <dd class="col-sm-10">@reviews.Rating</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Comments</dt>
+            <dd class="col-sm-10">@reviews.Comments</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@reviews.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@reviews.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@reviews.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@reviews.UpdatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">BookingId</dt>
+            <dd class="col-sm-10">@reviews.BookingId</dd>
+        </dl>
+        <EditForm method="post" Model="reviews" OnValidSubmit="DeleteReviews" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(reviews is null)">Delete</button> |
+            <a href="/reviews">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Reviews? reviews;
+
+    [SupplyParameterFromQuery]
+    private string ReviewsId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        reviews = await context.Reviews.FirstOrDefaultAsync(m => m.ReviewsId == ReviewsId);
+
+        if (reviews is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteReviews()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Reviews.Remove(reviews!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/reviews");
+    }
+}

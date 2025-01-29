@@ -1,0 +1,58 @@
+﻿@page "/reviews/details"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Reviews</h2>
+    <hr />
+    @if (reviews is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Rating</dt>
+            <dd class="col-sm-10">@reviews.Rating</dd>
+            <dt class="col-sm-2">Comments</dt>
+            <dd class="col-sm-10">@reviews.Comments</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@reviews.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@reviews.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@reviews.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@reviews.UpdatedBy</dd>
+            <dt class="col-sm-2">BookingId</dt>
+            <dd class="col-sm-10">@reviews.BookingId</dd>
+        </dl>
+        <div>
+            <a href="@($"/reviews/edit?reviewsid={reviews.ReviewsId}")">Edit</a> |
+            <a href="@($"/reviews")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Reviews? reviews;
+
+    [SupplyParameterFromQuery]
+    private string ReviewsId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        reviews = await context.Reviews.FirstOrDefaultAsync(m => m.ReviewsId == ReviewsId);
+
+        if (reviews is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

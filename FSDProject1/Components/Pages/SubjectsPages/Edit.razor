@@ -1,0 +1,114 @@
+﻿@page "/subjects/edit"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Subjects</h2>
+<hr />
+@if (Subjects is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Subjects" OnValidSubmit="UpdateSubjects" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Subjects.SubjectId" value="@Subjects.SubjectId" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Subjects.Name" class="form-control" />
+                    <ValidationMessage For="() => Subjects.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Subjects.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Subjects.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Subjects.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Subjects.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Subjects.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Subjects.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Subjects.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Subjects.UpdatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="tutorid" class="form-label">TutorId:</label>
+                    <InputNumber id="tutorid" @bind-Value="Subjects.TutorId" class="form-control" />
+                    <ValidationMessage For="() => Subjects.TutorId" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/subjects">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int SubjectId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Subjects? Subjects { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Subjects ??= await context.Subjects.FirstOrDefaultAsync(m => m.SubjectId == SubjectId);
+
+        if (Subjects is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSubjects()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Subjects!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SubjectsExists(Subjects!.SubjectId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/subjects");
+    }
+
+    private bool SubjectsExists(int subjectid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Subjects.Any(e => e.SubjectId == subjectid);
+    }
+}

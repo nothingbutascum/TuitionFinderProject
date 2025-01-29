@@ -1,0 +1,58 @@
+﻿@page "/studentusers/details"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>StudentUser</h2>
+    <hr />
+    @if (studentuser is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@studentuser.Name</dd>
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@studentuser.Email</dd>
+            <dt class="col-sm-2">Age</dt>
+            <dd class="col-sm-10">@studentuser.Age</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@studentuser.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@studentuser.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@studentuser.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@studentuser.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/studentusers/edit?studentuserid={studentuser.StudentUserId}")">Edit</a> |
+            <a href="@($"/studentusers")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private StudentUser? studentuser;
+
+    [SupplyParameterFromQuery]
+    private int StudentUserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        studentuser = await context.StudentUser.FirstOrDefaultAsync(m => m.StudentUserId == StudentUserId);
+
+        if (studentuser is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

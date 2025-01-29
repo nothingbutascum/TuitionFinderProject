@@ -1,0 +1,64 @@
+﻿@page "/tutors/details"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Tutors</h2>
+    <hr />
+    @if (tutors is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@tutors.Name</dd>
+            <dt class="col-sm-2">Qualification</dt>
+            <dd class="col-sm-10">@tutors.Qualification</dd>
+            <dt class="col-sm-2">Experience</dt>
+            <dd class="col-sm-10">@tutors.Experience</dd>
+            <dt class="col-sm-2">HourlyRate</dt>
+            <dd class="col-sm-10">@tutors.HourlyRate</dd>
+            <dt class="col-sm-2">Rating</dt>
+            <dd class="col-sm-10">@tutors.Rating</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@tutors.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@tutors.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@tutors.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@tutors.UpdatedBy</dd>
+            <dt class="col-sm-2">StudentUserId</dt>
+            <dd class="col-sm-10">@tutors.StudentUserId</dd>
+        </dl>
+        <div>
+            <a href="@($"/tutors/edit?tutorid={tutors.TutorId}")">Edit</a> |
+            <a href="@($"/tutors")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Tutors? tutors;
+
+    [SupplyParameterFromQuery]
+    private int TutorId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        tutors = await context.Tutors.FirstOrDefaultAsync(m => m.TutorId == TutorId);
+
+        if (tutors is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

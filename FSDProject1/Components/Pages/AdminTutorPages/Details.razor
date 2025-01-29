@@ -1,0 +1,56 @@
+﻿@page "/admintutors/details"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>AdminTutor</h2>
+    <hr />
+    @if (admintutor is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@admintutor.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@admintutor.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@admintutor.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@admintutor.UpdatedBy</dd>
+            <dt class="col-sm-2">TutorId</dt>
+            <dd class="col-sm-10">@admintutor.TutorId</dd>
+            <dt class="col-sm-2">SubjectId</dt>
+            <dd class="col-sm-10">@admintutor.SubjectId</dd>
+        </dl>
+        <div>
+            <a href="@($"/admintutors/edit?admintutorid={admintutor.AdminTutorId}")">Edit</a> |
+            <a href="@($"/admintutors")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private AdminTutor? admintutor;
+
+    [SupplyParameterFromQuery]
+    private int AdminTutorId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        admintutor = await context.AdminTutor.FirstOrDefaultAsync(m => m.AdminTutorId == AdminTutorId);
+
+        if (admintutor is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

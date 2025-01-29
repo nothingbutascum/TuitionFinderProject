@@ -1,0 +1,69 @@
+﻿@page "/admintutors/create"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>AdminTutor</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="AdminTutor" OnValidSubmit="AddAdminTutor" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="datecreated" class="form-label">DateCreated:</label> 
+                <InputDate id="datecreated" @bind-Value="AdminTutor.DateCreated" class="form-control" /> 
+                <ValidationMessage For="() => AdminTutor.DateCreated" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="dateupdated" class="form-label">DateUpdated:</label> 
+                <InputDate id="dateupdated" @bind-Value="AdminTutor.DateUpdated" class="form-control" /> 
+                <ValidationMessage For="() => AdminTutor.DateUpdated" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="createdby" class="form-label">CreatedBy:</label> 
+                <InputText id="createdby" @bind-Value="AdminTutor.CreatedBy" class="form-control" /> 
+                <ValidationMessage For="() => AdminTutor.CreatedBy" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="updatedby" class="form-label">UpdatedBy:</label> 
+                <InputText id="updatedby" @bind-Value="AdminTutor.UpdatedBy" class="form-control" /> 
+                <ValidationMessage For="() => AdminTutor.UpdatedBy" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="tutorid" class="form-label">TutorId:</label> 
+                <InputNumber id="tutorid" @bind-Value="AdminTutor.TutorId" class="form-control" /> 
+                <ValidationMessage For="() => AdminTutor.TutorId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="subjectid" class="form-label">SubjectId:</label> 
+                <InputNumber id="subjectid" @bind-Value="AdminTutor.SubjectId" class="form-control" /> 
+                <ValidationMessage For="() => AdminTutor.SubjectId" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/admintutors">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private AdminTutor AdminTutor { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddAdminTutor()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.AdminTutor.Add(AdminTutor);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/admintutors");
+    }
+}

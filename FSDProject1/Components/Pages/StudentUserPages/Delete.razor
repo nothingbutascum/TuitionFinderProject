@@ -1,0 +1,79 @@
+﻿@page "/studentusers/delete"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>StudentUser</h2>
+    <hr />
+    @if (studentuser is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@studentuser.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@studentuser.Email</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Age</dt>
+            <dd class="col-sm-10">@studentuser.Age</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@studentuser.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@studentuser.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@studentuser.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@studentuser.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="studentuser" OnValidSubmit="DeleteStudentUser" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(studentuser is null)">Delete</button> |
+            <a href="/studentusers">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private StudentUser? studentuser;
+
+    [SupplyParameterFromQuery]
+    private int StudentUserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        studentuser = await context.StudentUser.FirstOrDefaultAsync(m => m.StudentUserId == StudentUserId);
+
+        if (studentuser is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteStudentUser()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.StudentUser.Remove(studentuser!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/studentusers");
+    }
+}

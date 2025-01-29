@@ -1,0 +1,232 @@
+﻿@page "/Account/Login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using FSDProject1.Data
+
+@inject SignInManager<FSDProject1User> SignInManager
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Log in - Hawk Tuition</PageTitle>
+<style>
+    /* Global Styles */
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Lato', sans-serif;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f9f9f9; /* Light background */
+    }
+
+
+    /* Login Container */
+    .login-container {
+        width: 400px;
+        padding: 40px;
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for a clean look */
+        text-align: center;
+    }
+
+    /* Logo */
+    .logo {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #004e92;
+        margin-bottom: 20px;
+    }
+
+    /* Title */
+    h2 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+        color: #2d2d2d;
+    }
+
+    /* Input Group */
+    .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+        .input-group label {
+            font-size: 0.9em;
+            color: #2d2d2d;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+    /* Buttons */
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 10px 20px;
+        font-size: 1em;
+        font-weight: bold;
+        border-radius: 20px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        border: none;
+    }
+
+    .btn-login {
+        background-color: #004e92;
+        color: white;
+        border: 2px solid #004e92;
+    }
+
+        .btn-login:hover {
+            background-color: white;
+            color: #ff5a5f;
+        }
+
+    .btn-register {
+        background-color: white;
+        color: #004e92;
+        border: 2px solid #004e92;
+    }
+
+        .btn-register:hover {
+            background-color: #004e92;
+            color: white;
+        }
+</style>
+
+<div class="login-container">
+    <div class="logo">Hawk Tuition</div>
+    <h2>Welcome back</h2>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="error-message">
+            <span class="error-icon">!</span>
+            @errorMessage
+        </div>
+    }
+
+    <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" role="alert" />
+
+        <div class="input-group">
+            <label for="email">Email</label>
+            <InputText id="email"
+                       @bind-Value="Input.Email"
+                       class="form-control"
+                       autocomplete="username"
+                       aria-required="true"
+                       placeholder="name@example.com" />
+            <ValidationMessage For="() => Input.Email" class="text-danger" />
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <InputText id="password"
+                       type="password"
+                       @bind-Value="Input.Password"
+                       class="form-control"
+                       autocomplete="current-password"
+                       aria-required="true" />
+            <ValidationMessage For="() => Input.Password" class="text-danger" />
+        </div>
+
+        <div class="checkbox">
+            <label>
+                <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
+                Remember me
+            </label>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-login">Sign In</button>
+            <a href="Account/Register" class="btn btn-register">Register</a>
+        </div>
+
+        <div class="forgot-password">
+            <a href="Account/ForgotPassword">Forgot your password?</a>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private string? errorMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    public async Task LoginUser()
+    {
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            NavigationManager.NavigateTo("/"); // Redirect to home
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            RedirectManager.RedirectTo("Account/LoginWith2fa", new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("User account locked out.");
+            RedirectManager.RedirectTo("Account/Lockout");
+        }
+        else
+        {
+            errorMessage = "Error: Invalid login attempt.";
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}

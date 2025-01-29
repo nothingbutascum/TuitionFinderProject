@@ -1,0 +1,134 @@
+﻿@page "/tutors/edit"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Tutors</h2>
+<hr />
+@if (Tutors is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Tutors" OnValidSubmit="UpdateTutors" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Tutors.TutorId" value="@Tutors.TutorId" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Tutors.Name" class="form-control" />
+                    <ValidationMessage For="() => Tutors.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="qualification" class="form-label">Qualification:</label>
+                    <InputText id="qualification" @bind-Value="Tutors.Qualification" class="form-control" />
+                    <ValidationMessage For="() => Tutors.Qualification" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="experience" class="form-label">Experience:</label>
+                    <InputText id="experience" @bind-Value="Tutors.Experience" class="form-control" />
+                    <ValidationMessage For="() => Tutors.Experience" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="hourlyrate" class="form-label">HourlyRate:</label>
+                    <InputNumber id="hourlyrate" @bind-Value="Tutors.HourlyRate" class="form-control" />
+                    <ValidationMessage For="() => Tutors.HourlyRate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating:</label>
+                    <InputNumber id="rating" @bind-Value="Tutors.Rating" class="form-control" />
+                    <ValidationMessage For="() => Tutors.Rating" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Tutors.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Tutors.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Tutors.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Tutors.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Tutors.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Tutors.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Tutors.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Tutors.UpdatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="studentuserid" class="form-label">StudentUserId:</label>
+                    <InputNumber id="studentuserid" @bind-Value="Tutors.StudentUserId" class="form-control" />
+                    <ValidationMessage For="() => Tutors.StudentUserId" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/tutors">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int TutorId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Tutors? Tutors { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Tutors ??= await context.Tutors.FirstOrDefaultAsync(m => m.TutorId == TutorId);
+
+        if (Tutors is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateTutors()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Tutors!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!TutorsExists(Tutors!.TutorId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/tutors");
+    }
+
+    private bool TutorsExists(int tutorid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Tutors.Any(e => e.TutorId == tutorid);
+    }
+}

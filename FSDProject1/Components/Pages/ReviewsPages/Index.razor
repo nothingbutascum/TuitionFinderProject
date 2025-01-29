@@ -1,0 +1,42 @@
+﻿@page "/reviews"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using FSDProject1.Domain
+@using FSDProject1.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="reviews/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Reviews">
+    <PropertyColumn Property="reviews => reviews.Rating" />
+    <PropertyColumn Property="reviews => reviews.Comments" />
+    <PropertyColumn Property="reviews => reviews.DateCreated" />
+    <PropertyColumn Property="reviews => reviews.DateUpdated" />
+    <PropertyColumn Property="reviews => reviews.CreatedBy" />
+    <PropertyColumn Property="reviews => reviews.UpdatedBy" />
+    <PropertyColumn Property="reviews => reviews.BookingId" />
+
+    <TemplateColumn Context="reviews">
+        <a href="@($"reviews/edit?reviewsid={reviews.ReviewsId}")">Edit</a> |
+        <a href="@($"reviews/details?reviewsid={reviews.ReviewsId}")">Details</a> |
+        <a href="@($"reviews/delete?reviewsid={reviews.ReviewsId}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private FSDProject1Context context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

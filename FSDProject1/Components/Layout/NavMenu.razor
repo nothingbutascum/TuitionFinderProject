@@ -1,79 +1,151 @@
-﻿@*
-@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Microsoft.AspNetCore.Components.Authorization
 @implements IDisposable
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">FSDProject1</a>
+<header>
+    <div class="logo">
+        <img src="/images/ht.png" alt="Hawk Tuition Finder Logo" />
     </div>
-</div>
+    <nav class="navigation">
+        <ul>
+            <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
+            <li><NavLink href="about">About Us</NavLink></li>
+            <li><NavLink href="services">Booking</NavLink></li>
+            <li><NavLink href="contact">Contact</NavLink></li>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="counter">
-                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-                    </NavLink>
-                </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="weather">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-                    </NavLink>
-                </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
+            @if (isAdmin)
+            {
+                <li><NavLink href="admintutors">Manage Tutors</NavLink></li>
+            }
+        </ul>
     </nav>
-</div>
+
+    <AuthorizeView>
+        <Authorized>
+            <div class="auth-buttons">
+                <NavLink href="Account/Manage">@context.User.Identity?.Name</NavLink>
+                <form action="Account/Logout" method="post" class="d-inline">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="logout-button">Logout</button>
+                </form>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="auth-buttons">
+                <NavLink href="Account/Login">Login</NavLink>
+                <NavLink href="Account/Register">Register</NavLink>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</header>
+
+<style>
+    header {
+        background: linear-gradient(90deg, #004e92, #000428);
+        color: white;
+        padding: 10px 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo img {
+        height: 120px;
+        width: auto;
+    }
+
+    .navigation ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 30px;
+    }
+
+    .navigation ::deep a {
+        color: white;
+        text-decoration: none;
+        font-size: 1.1em;
+        font-weight: 500;
+        text-transform: uppercase;
+        transition: color 0.3s ease;
+    }
+
+        .navigation ::deep a:hover {
+            color: #ffcd3c;
+        }
+
+    /* Auth Buttons */
+    .auth-buttons {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+        .auth-buttons ::deep a,
+        .logout-button {
+            font-size: 0.9em;
+            padding: 8px 20px;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: 2px solid white;
+            border-radius: 30px;
+            text-decoration: none;
+            color: white;
+            background: transparent;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+            .auth-buttons ::deep a:hover,
+            .logout-button:hover {
+                background-color: white;
+                color: #004e92;
+            }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        header {
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .logo img {
+            height: 80px;
+        }
+
+        .navigation ul {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .auth-buttons {
+            margin-top: 10px;
+        }
+    }
+</style>
 
 @code {
     private string? currentUrl;
+    private bool isAdmin = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        isAdmin = user.IsInRole("Admin");
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -87,4 +159,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-*@

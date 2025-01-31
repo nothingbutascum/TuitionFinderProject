@@ -33,7 +33,7 @@ namespace FSDProject1.Domain
 
         //Foreign Key
 
-        public int StudentUserId    { get; set; }
+        public int? StudentUserId    { get; set; }
 
         public StudentUser? StudentUser { get; set; }
 

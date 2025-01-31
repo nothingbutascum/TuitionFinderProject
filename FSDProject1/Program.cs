@@ -23,10 +23,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 
-// ✅ FIX: Remove generic type argument for IdentityRevalidatingAuthenticationStateProvider
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-// ✅ FIX: Register UserManager & SignInManager
+// Register Identity services
 builder.Services.AddScoped<UserManager<FSDProject1User>>();
 builder.Services.AddScoped<SignInManager<FSDProject1User>>();
 
@@ -38,24 +35,31 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-// Configure IdentityCore
+// Configure IdentityCore with roles
 builder.Services.AddIdentityCore<FSDProject1User>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>()  // ✅ Add roles if needed
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<FSDProject1Context>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
 
 // Configure email sender (mock implementation)
 builder.Services.AddSingleton<IEmailSender<FSDProject1User>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 
-// Configure middleware pipeline
-if (!app.Environment.IsDevelopment())
+// ✅ Seed admin user and roles
+using (var scope = app.Services.CreateScope())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
-    app.UseMigrationsEndPoint();
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<FSDProject1User>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await SeedAdminAsync(userManager, roleManager);
 }
 
 app.UseHttpsRedirection();
@@ -68,3 +72,26 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+// ✅ Function to Seed Admin User and Role
+async Task SeedAdminAsync(UserManager<FSDProject1User> userManager, RoleManager<IdentityRole> roleManager)
+{
+    string adminRole = "Admin";
+    string adminEmail = "admin@example.com";
+    string adminPassword = "Admin@123"; // Change this securely
+
+    // Create Admin Role if it doesn't exist
+    if (!await roleManager.RoleExistsAsync(adminRole))
+    {
+        await roleManager.CreateAsync(new IdentityRole(adminRole));
+    }
+
+    // Create Admin User if it doesn't exist
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        adminUser = new FSDProject1User { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+        await userManager.CreateAsync(adminUser, adminPassword);
+        await userManager.AddToRoleAsync(adminUser, adminRole);
+    }
+}

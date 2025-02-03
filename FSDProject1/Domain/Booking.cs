@@ -17,11 +17,11 @@ namespace FSDProject1.Domain
 
 
         public int StudentUserId { get; set; } // Foreign Key referencing StudentUser
-        public StudentUser StudentUser { get; set; } //Navigation Propterty
+        public StudentUser? StudentUser { get; set; } //Navigation Propterty
        
 
         public int TutorID { get; set; } // Foreign Key referencing Tutor
         [DeleteBehavior(DeleteBehavior.Restrict)]
-        public Tutors Tutor { get; set; }
+        public Tutors? Tutor { get; set; }
     }
 }

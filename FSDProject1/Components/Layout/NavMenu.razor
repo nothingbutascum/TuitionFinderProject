@@ -11,12 +11,12 @@
         <ul>
             <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
             <li><NavLink href="about">About Us</NavLink></li>
-            <li><NavLink href="services">Booking</NavLink></li>
-            <li><NavLink href="contact">Contact</NavLink></li>
+            <li><NavLink href="/bookings/create">Booking</NavLink></li>
+            <li><NavLink href="contact">Contact Us</NavLink></li>
 
             @if (isAdmin)
             {
-                <li><NavLink href="admintutors">Manage Tutors</NavLink></li>
+                <li><NavLink href="/tutors/create">Manage Tutors</NavLink></li>
             }
         </ul>
     </nav>

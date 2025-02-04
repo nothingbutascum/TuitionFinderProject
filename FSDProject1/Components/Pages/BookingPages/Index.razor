@@ -1,5 +1,4 @@
 ﻿@page "/bookings"
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using FSDProject1.Domain
@@ -7,7 +6,6 @@
 @implements IAsyncDisposable
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 
-@attribute [Authorize(Roles = "Administrator, User")]
 <PageTitle>Index</PageTitle>
 
 <h1>Index</h1>
@@ -25,7 +23,7 @@
     <PropertyColumn Property="booking => booking.CreatedBy" />
     <PropertyColumn Property="booking => booking.UpdatedBy" />
     <PropertyColumn Property="booking => booking.StudentUserId" />
-    <PropertyColumn Property="booking => booking.TutorID" />
+    <PropertyColumn Property="booking => booking.TutorId" />
 
     <TemplateColumn Context="booking">
         <a href="@($"bookings/edit?bookingid={booking.BookingID}")">Edit</a> |
@@ -37,9 +35,9 @@
 @code {
     private FSDProject1Context context = default!;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        context = await DbFactory.CreateDbContextAsync();
+        context = DbFactory.CreateDbContext();
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

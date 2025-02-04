@@ -1,10 +1,9 @@
 ﻿@page "/bookings/edit"
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using FSDProject1.Domain
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
-@attribute [Authorize(Roles = "Administrator, User")]
+
 <PageTitle>Edit</PageTitle>
 
 <h1>Edit</h1>
@@ -30,7 +29,7 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="time" class="form-label">Time:</label>
-                    <InputDate id="time" @bind-Value="Booking.Time" class="form-control" />
+                    <InputText id="time" @bind-Value="Booking.Time" class="form-control" />
                     <ValidationMessage For="() => Booking.Time" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -64,9 +63,9 @@ else
                     <ValidationMessage For="() => Booking.StudentUserId" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="tutorid" class="form-label">TutorID:</label>
-                    <InputNumber id="tutorid" @bind-Value="Booking.TutorID" class="form-control" />
-                    <ValidationMessage For="() => Booking.TutorID" class="text-danger" />
+                    <label for="tutorid" class="form-label">TutorId:</label>
+                    <InputNumber id="tutorid" @bind-Value="Booking.TutorId" class="form-control" />
+                    <ValidationMessage For="() => Booking.TutorId" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>

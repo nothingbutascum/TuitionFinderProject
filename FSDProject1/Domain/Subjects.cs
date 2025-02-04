@@ -19,8 +19,9 @@ namespace FSDProject1.Domain
 
         //Foreign Key to Tutor
         public int TutorId { get; set; }
+        public Tutors? Tutor { get; set; }
 
-        public Tutors? Tutor { get; set; }// Navigation Property
+        public ICollection<Tutors> Tutors { get; set; } = new List<Tutors>();
 
 
     }

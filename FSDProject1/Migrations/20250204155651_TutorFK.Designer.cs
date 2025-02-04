@@ -4,6 +4,7 @@ using FSDProject1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FSDProject1.Migrations
 {
     [DbContext(typeof(FSDProject1Context))]
-    partial class FSDProject1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250204155651_TutorFK")]
+    partial class TutorFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -414,8 +417,6 @@ namespace FSDProject1.Migrations
 
                     b.HasKey("SubjectId");
 
-                    b.HasIndex("TutorId");
-
                     b.ToTable("Subjects");
 
                     b.HasData(
@@ -673,19 +674,19 @@ namespace FSDProject1.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TutorSubject", b =>
+            modelBuilder.Entity("SubjectsTutors", b =>
                 {
-                    b.Property<int>("SubjectId")
+                    b.Property<int>("SubjectsSubjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TutorId")
+                    b.Property<int>("TutorsTutorId")
                         .HasColumnType("int");
 
-                    b.HasKey("SubjectId", "TutorId");
+                    b.HasKey("SubjectsSubjectId", "TutorsTutorId");
 
-                    b.HasIndex("TutorId");
+                    b.HasIndex("TutorsTutorId");
 
-                    b.ToTable("TutorSubject");
+                    b.ToTable("SubjectsTutors");
                 });
 
             modelBuilder.Entity("FSDProject1.Domain.AdminTutor", b =>
@@ -735,17 +736,6 @@ namespace FSDProject1.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
-                });
-
-            modelBuilder.Entity("FSDProject1.Domain.Subjects", b =>
-                {
-                    b.HasOne("FSDProject1.Domain.Tutors", "Tutor")
-                        .WithMany()
-                        .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Tutor");
                 });
 
             modelBuilder.Entity("FSDProject1.Domain.Tutors", b =>
@@ -808,17 +798,17 @@ namespace FSDProject1.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TutorSubject", b =>
+            modelBuilder.Entity("SubjectsTutors", b =>
                 {
                     b.HasOne("FSDProject1.Domain.Subjects", null)
                         .WithMany()
-                        .HasForeignKey("SubjectId")
+                        .HasForeignKey("SubjectsSubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("FSDProject1.Domain.Tutors", null)
                         .WithMany()
-                        .HasForeignKey("TutorId")
+                        .HasForeignKey("TutorsTutorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,10 +1,8 @@
 ﻿@page "/bookings/delete"
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using FSDProject1.Domain
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
-@attribute [Authorize(Roles = "Administrator, User")]
 
 <PageTitle>Delete</PageTitle>
 
@@ -52,8 +50,8 @@
             <dd class="col-sm-10">@booking.StudentUserId</dd>
         </dl>
         <dl class="row">
-            <dt class="col-sm-2">TutorID</dt>
-            <dd class="col-sm-10">@booking.TutorID</dd>
+            <dt class="col-sm-2">TutorId</dt>
+            <dd class="col-sm-10">@booking.TutorId</dd>
         </dl>
         <EditForm method="post" Model="booking" OnValidSubmit="DeleteBooking" FormName="delete" Enhance>
             <button type="submit" class="btn btn-danger" disabled="@(booking is null)">Delete</button> |

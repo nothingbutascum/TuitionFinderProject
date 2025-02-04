@@ -8,7 +8,7 @@ namespace FSDProject1.Domain
         [Key]
         public int BookingID { get; set; } // Primary Key
         public DateTime Date { get; set; }
-        public DateTime Time { get; set; }
+        public string Time { get; set; }
         public string Status { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
@@ -20,7 +20,7 @@ namespace FSDProject1.Domain
         public StudentUser? StudentUser { get; set; } //Navigation Propterty
        
 
-        public int TutorID { get; set; } // Foreign Key referencing Tutor
+        public int TutorId { get; set; } // Foreign Key referencing Tutor
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public Tutors? Tutor { get; set; }
     }

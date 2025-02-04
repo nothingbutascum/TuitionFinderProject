@@ -4,65 +4,56 @@
 @using FSDProject1.Domain
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
-@attribute [Authorize(Roles = "Administrator, User")]
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Booking</PageTitle>
 
-<h1>Create</h1>
-
-<h2>Booking</h2>
+<h1>Create Booking</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="Booking" OnValidSubmit="AddBooking" FormName="create" Enhance>
+        <EditForm Model="Booking" OnValidSubmit="AddBooking" FormName="createBooking">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
             <div class="mb-3">
-                <label for="date" class="form-label">Date:</label> 
-                <InputDate id="date" @bind-Value="Booking.Date" class="form-control" /> 
-                <ValidationMessage For="() => Booking.Date" class="text-danger" /> 
-            </div>        
+                <label for="subjectid" class="form-label">Select Subject:</label>
+                <InputSelect id="subjectid" @bind-Value="SelectedSubjectId" class="form-control">
+                    <option value="" disabled>Select a subject</option>
+                    @if (Subjects != null && Subjects.Any())
+                    {
+                        foreach (var subject in Subjects)
+                        {
+                            <option value="@subject.SubjectId">@subject.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+
             <div class="mb-3">
-                <label for="time" class="form-label">Time:</label> 
-                <InputDate id="time" @bind-Value="Booking.Time" class="form-control" /> 
-                <ValidationMessage For="() => Booking.Time" class="text-danger" /> 
-            </div>        
+                <label for="tutorid" class="form-label">Select Tutor:</label>
+                <InputSelect id="tutorid" @bind-Value="Booking.TutorId" class="form-control">
+                    <option value="" disabled>Select a tutor</option>
+                    @if (Tutors != null && Tutors.Any())
+                    {
+                        foreach (var tutor in Tutors)
+                        {
+                            <option value="@tutor.TutorId">@tutor.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+
             <div class="mb-3">
-                <label for="status" class="form-label">Status:</label> 
-                <InputText id="status" @bind-Value="Booking.Status" class="form-control" /> 
-                <ValidationMessage For="() => Booking.Status" class="text-danger" /> 
-            </div>        
+                <label for="date" class="form-label">Date:</label>
+                <InputDate id="date" @bind-Value="Booking.Date" class="form-control" />
+            </div>
             <div class="mb-3">
-                <label for="datecreated" class="form-label">DateCreated:</label> 
-                <InputDate id="datecreated" @bind-Value="Booking.DateCreated" class="form-control" /> 
-                <ValidationMessage For="() => Booking.DateCreated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="dateupdated" class="form-label">DateUpdated:</label> 
-                <InputDate id="dateupdated" @bind-Value="Booking.DateUpdated" class="form-control" /> 
-                <ValidationMessage For="() => Booking.DateUpdated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="createdby" class="form-label">CreatedBy:</label> 
-                <InputText id="createdby" @bind-Value="Booking.CreatedBy" class="form-control" /> 
-                <ValidationMessage For="() => Booking.CreatedBy" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="updatedby" class="form-label">UpdatedBy:</label> 
-                <InputText id="updatedby" @bind-Value="Booking.UpdatedBy" class="form-control" /> 
-                <ValidationMessage For="() => Booking.UpdatedBy" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="studentuserid" class="form-label">StudentUserId:</label> 
-                <InputNumber id="studentuserid" @bind-Value="Booking.StudentUserId" class="form-control" /> 
-                <ValidationMessage For="() => Booking.StudentUserId" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="tutorid" class="form-label">TutorID:</label> 
-                <InputNumber id="tutorid" @bind-Value="Booking.TutorID" class="form-control" /> 
-                <ValidationMessage For="() => Booking.TutorID" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+                <label for="time" class="form-label">Time:</label>
+                <InputText id="time" @bind-Value="Booking.Time" class="form-control" placeholder="HH:mm" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Confirm Booking</button>
         </EditForm>
     </div>
 </div>
@@ -72,15 +63,58 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private Booking Booking { get; set; } = new();
+    private Booking Booking { get; set; } = new()
+        {
+            Date = DateTime.Now,
+            Status = "Confirmed"
+        };
+    private List<Tutors> Tutors { get; set; } = new();
+    private List<Subjects> Subjects { get; set; } = new();
+    private int SelectedSubjectId { get; set; }
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Subjects = await context.Subjects.ToListAsync();
+        Tutors = await context.Tutors.ToListAsync();
+    }
+
     private async Task AddBooking()
     {
         using var context = DbFactory.CreateDbContext();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        string userName = user.Identity?.Name ?? "System";
+
+        Console.WriteLine($"User: {userName}");
+        Console.WriteLine($"TutorId: {Booking.TutorId}");
+        Console.WriteLine($"Date: {Booking.Date}");
+        Console.WriteLine($"Time: {Booking.Time}");
+
+        // ✅ Validate TutorId before saving
+        if (Booking.TutorId == 0 || !Tutors.Any(t => t.TutorId == Booking.TutorId))
+        {
+            Console.WriteLine("Invalid TutorId: No tutor selected or tutor does not exist.");
+            return; // Stop execution if TutorId is invalid
+        }
+
+        // ✅ Ensure Time is not null or empty before saving
+        if (string.IsNullOrWhiteSpace(Booking.Time))
+        {
+            Booking.Time = "00:00"; // Default time to prevent null insertion
+        }
+
+        Booking.CreatedBy = userName;
+        Booking.UpdatedBy = userName;
+        Booking.DateCreated = DateTime.UtcNow;
+        Booking.DateUpdated = DateTime.UtcNow;
+        Booking.Status = "Confirmed";
+
+        Console.WriteLine("Saving Booking...");
         context.Booking.Add(Booking);
         await context.SaveChangesAsync();
+        Console.WriteLine("Booking Saved!");
+
         NavigationManager.NavigateTo("/bookings");
     }
 }

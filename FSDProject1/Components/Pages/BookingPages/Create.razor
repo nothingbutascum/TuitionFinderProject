@@ -5,6 +5,7 @@
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
 
 <PageTitle>Create Booking</PageTitle>
 
@@ -32,13 +33,13 @@
 
             <div class="mb-3">
                 <label for="tutorid" class="form-label">Select Tutor:</label>
-                <InputSelect id="tutorid" @bind-Value="Booking.TutorId" class="form-control">
+                <InputSelect id="tutorid" @bind-Value="tutorName" class="form-control">
                     <option value="" disabled>Select a tutor</option>
                     @if (Tutors != null && Tutors.Any())
                     {
                         foreach (var tutor in Tutors)
                         {
-                            <option value="@tutor.TutorId">@tutor.Name</option>
+                            <option value="@tutor.Name">@tutor.Name</option>
                         }
                     }
                 </InputSelect>
@@ -63,14 +64,19 @@
 </div>
 
 @code {
+    private List<Tutors> Tutors { get; set; } = new();
+    private List<Subjects> Subjects { get; set; } = new();
+    private int SelectedSubjectId { get; set; }
+    private string tutorName; // New field to bind the selected tutor's name
+    private StudentUser StudentUser { get; set; } = new();
+
+    // Supply the Booking model from the form
+    [SupplyParameterFromForm(FormName = "createBooking")]
     private Booking Booking { get; set; } = new()
         {
             Date = DateTime.Now,
             Status = "Confirmed"
         };
-    private List<Tutors> Tutors { get; set; } = new();
-    private List<Subjects> Subjects { get; set; } = new();
-    private int SelectedSubjectId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,13 +84,34 @@
         Subjects = await context.Subjects.ToListAsync();
         Tutors = await context.Tutors.ToListAsync();
     }
+    private string userid;
 
     private async Task AddBooking()
     {
-        using var context = DbFactory.CreateDbContext();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        string userName = user.Identity?.Name ?? "System";
+        string userName = "Anonymous";
+        userid = user.FindFirst("userId")?.Value;
+
+        // Check if user is logged in, otherwise use "Anonymous"
+        if (user.FindFirst("FirstName")?.Value != null)
+        {
+            userName = user.FindFirst("FirstName")?.Value;
+        }
+
+        // Match tutorName with tutor.Name to set the Booking.TutorId
+        var tutor = Tutors.FirstOrDefault(t => t.Name == tutorName);
+        if (tutor != null)
+        {
+            Booking.TutorId = tutor.TutorId;
+        }
+        else
+        {
+            Console.WriteLine("No matching tutor found for the selected name.");
+            return; // Stop execution if tutor is not found
+        }
+
+        Booking.StudentUserId = 1;
 
         Console.WriteLine($"User: {userName}");
         Console.WriteLine($"TutorId: {Booking.TutorId}");
@@ -104,6 +131,7 @@
             Booking.Time = "00:00"; // Default time to prevent null insertion
         }
 
+        // User-related fields
         Booking.CreatedBy = userName;
         Booking.UpdatedBy = userName;
         Booking.DateCreated = DateTime.UtcNow;
@@ -111,10 +139,12 @@
         Booking.Status = "Confirmed";
 
         Console.WriteLine("Saving Booking...");
+        using var context = DbFactory.CreateDbContext();
         context.Booking.Add(Booking);
         await context.SaveChangesAsync();
         Console.WriteLine("Booking Saved!");
 
+        // Redirect to booking list page
         NavigationManager.NavigateTo("/bookings");
     }
 }

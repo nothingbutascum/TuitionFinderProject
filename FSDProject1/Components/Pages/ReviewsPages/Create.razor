@@ -3,72 +3,93 @@
 @using FSDProject1.Domain
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Review</PageTitle>
 
-<h1>Create</h1>
-
-<h2>Reviews</h2>
+<h1>Create Review</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="Reviews" OnValidSubmit="AddReviews" FormName="create" Enhance>
+        <EditForm Model="Review" OnValidSubmit="AddReview" FormName="createReview">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- Rating Field -->
             <div class="mb-3">
-                <label for="rating" class="form-label">Rating:</label> 
-                <InputText id="rating" @bind-Value="Reviews.Rating" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.Rating" class="text-danger" /> 
-            </div>        
+                <label for="rating" class="form-label">Rating (1-5):</label>
+                <InputNumber id="rating" @bind-Value="Review.Rating" class="form-control" min="1" max="5" />
+                <ValidationMessage For="() => Review.Rating" class="text-danger" />
+            </div>
+
+            <!-- Comments Field -->
             <div class="mb-3">
-                <label for="comments" class="form-label">Comments:</label> 
-                <InputText id="comments" @bind-Value="Reviews.Comments" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.Comments" class="text-danger" /> 
-            </div>        
+                <label for="comments" class="form-label">Comments:</label>
+                <InputText id="comments" @bind-Value="Review.Comments" class="form-control" />
+                <ValidationMessage For="() => Review.Comments" class="text-danger" />
+            </div>
+
+            <!-- Booking ID (Hidden Field, Only for the Logged-In User's Bookings) -->
             <div class="mb-3">
-                <label for="datecreated" class="form-label">DateCreated:</label> 
-                <InputDate id="datecreated" @bind-Value="Reviews.DateCreated" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.DateCreated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="dateupdated" class="form-label">DateUpdated:</label> 
-                <InputDate id="dateupdated" @bind-Value="Reviews.DateUpdated" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.DateUpdated" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="createdby" class="form-label">CreatedBy:</label> 
-                <InputText id="createdby" @bind-Value="Reviews.CreatedBy" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.CreatedBy" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="updatedby" class="form-label">UpdatedBy:</label> 
-                <InputText id="updatedby" @bind-Value="Reviews.UpdatedBy" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.UpdatedBy" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="bookingid" class="form-label">BookingId:</label> 
-                <InputNumber id="bookingid" @bind-Value="Reviews.BookingId" class="form-control" /> 
-                <ValidationMessage For="() => Reviews.BookingId" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+                <label for="bookingid" class="form-label">Booking ID:</label>
+                <InputNumber id="bookingid" @bind-Value="Review.BookingId" class="form-control" disabled />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Review</button>
         </EditForm>
     </div>
 </div>
 
 <div>
-    <a href="/reviews">Back to List</a>
+    <a href="/bookings">Back to List</a>
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private Reviews Reviews { get; set; } = new();
+    private Reviews Review { get; set; } = new();
+    private List<Booking> UserBookings { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task AddReviews()
+    protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Retrieve the user ID from the logged-in user's claim
+        var userIdString = user.FindFirst("userId")?.Value;
+        if (!string.IsNullOrEmpty(userIdString) && int.TryParse(userIdString, out int userId))
+        {
+            // Get the bookings made by the logged-in user
+            using var context = DbFactory.CreateDbContext();
+            UserBookings = await context.Booking.Where(b => b.StudentUserId == userId).ToListAsync();
+        }
+    }
+
+    private async Task AddReview()
+    {
+        // Validate if the review is being made for a valid booking
+        if (Review.BookingId == 0 || !UserBookings.Any(b => b.BookingID == Review.BookingId))
+        {
+            Console.WriteLine("Invalid Booking ID or the booking does not belong to the logged-in user.");
+            return; // Stop execution if the booking ID is invalid or does not belong to the user
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        string userName = user.FindFirst("FirstName")?.Value ?? "Anonymous"; // Use FirstName for CreatedBy
+
+        // Add the review's properties
+        Review.CreatedBy = userName;
+        Review.UpdatedBy = userName;
+        Review.DateCreated = DateTime.UtcNow;
+        Review.DateUpdated = DateTime.UtcNow;
+
+        // Save the review
         using var context = DbFactory.CreateDbContext();
-        context.Reviews.Add(Reviews);
+        context.Reviews.Add(Review);
         await context.SaveChangesAsync();
+
+        Console.WriteLine("Review Saved!");
+
+        // Redirect to the reviews list page
         NavigationManager.NavigateTo("/reviews");
     }
 }

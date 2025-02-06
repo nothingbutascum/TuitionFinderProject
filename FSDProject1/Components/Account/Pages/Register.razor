@@ -3,6 +3,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
+@using FSDProject1.Domain
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using FSDProject1.Data
@@ -15,26 +16,9 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject RoleManager<IdentityRole> RoleManager
+@inject FSDProject1Context DbContext  // Use the DbContext directly
 
 <PageTitle>Register</PageTitle>
-
-<!-- Add Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
-<style>
-    /* Custom CSS for the header */
-    .custom-header {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        font-size: 2rem;
-        color: #fff;
-    }
-
-    /* Ensure the rest of the form uses a clean font */
-    body {
-        font-family: 'Poppins', sans-serif;
-    }
-</style>
 
 <!-- Registration Form -->
 <div class="container mt-5">
@@ -71,6 +55,13 @@
                             <ValidationMessage For="() => Input.LastName" class="text-danger" />
                         </div>
 
+                        <!-- Age Field -->
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age</label>
+                            <InputNumber @bind-Value="Input.Age" class="form-control" min="18" max="100" required />
+                            <ValidationMessage For="() => Input.Age" class="text-danger" />
+                        </div>
+
                         <!-- Password Field -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
@@ -93,8 +84,6 @@
         </div>
     </div>
 </div>
-
-
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
@@ -125,17 +114,36 @@
             return;
         }
 
+        // Create StudentUser and link it with IdentityUser
+        var studentUser = new StudentUser
+            {
+                // Link the StudentUser to the IdentityUser by using the IdentityUser Id (user.Id)
+                Name = $"{Input.FirstName} {Input.LastName}",
+                Email = Input.Email,
+                Age = Input.Age,  // Set Age
+                DateCreated = DateTime.UtcNow,
+                DateUpdated = DateTime.UtcNow,
+                CreatedBy = user.UserName,
+                UpdatedBy = user.UserName
+            };
+
+        // Add the StudentUser to the database
+        DbContext.StudentUser.Add(studentUser); // Add to StudentUser table
+        await DbContext.SaveChangesAsync();
+
+        Logger.LogInformation("User created a new account with password.");
+
         // Create the user role if it doesn't exist
         if (!await RoleManager.RoleExistsAsync("User"))
         {
             await RoleManager.CreateAsync(new IdentityRole("User"));
         }
+
         // Add the user to the user role
         await UserManager.AddToRoleAsync(user, "User");
+
         // Add the user ID as a claim when the user registers
         await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("userId", user.Id));
-
-        Logger.LogInformation("User created a new account with password.");
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -193,6 +201,11 @@
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
+
+        [Required]
+        [Range(18, 100, ErrorMessage = "Age must be between 18 and 100.")]
+        [Display(Name = "Age")]
+        public int Age { get; set; }
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]

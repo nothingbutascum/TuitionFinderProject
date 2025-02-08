@@ -33,13 +33,13 @@
 
             <div class="mb-3">
                 <label for="tutorid" class="form-label">Select Tutor:</label>
-                <InputSelect id="tutorid" @bind-Value="SelectedTutorId" class="form-control" @onchange="OnTutorChanged">
-                    <option value="0" disabled>Select a tutor</option>
+                <InputSelect id="tutorid" @bind-Value="tutorName" class="form-control">
+                    <option value="" disabled>Select a tutor</option>
                     @if (Tutors != null && Tutors.Any())
                     {
                         foreach (var tutor in Tutors)
                         {
-                            <option value="@tutor.TutorId">@tutor.Name</option>
+                            <option value="@tutor.Name">@tutor.Name</option>
                         }
                     }
                 </InputSelect>
@@ -47,7 +47,7 @@
 
             <div class="mb-3">
                 <label for="date" class="form-label">Date:</label>
-                <InputDate id="date" @bind-Value="Booking.Date" class="form-control" @onchange="OnDateChanged" />
+                <InputDate id="date" @bind-Value="Booking.Date" class="form-control" />
             </div>
 
             <div class="mb-3">
@@ -74,10 +74,8 @@
     private List<Tutors> Tutors { get; set; } = new();
     private List<Subjects> Subjects { get; set; } = new();
     private int SelectedSubjectId { get; set; }
-    private int SelectedTutorId { get; set; }
+    private string tutorName;
     private StudentUser StudentUser { get; set; } = new();
-    private string AuthenticatedUserId { get; set; } = string.Empty;
-    private string AuthenticatedUserName { get; set; } = "Anonymous";
 
     private List<string> AvailableTimeSlots = new()
     {
@@ -85,6 +83,7 @@
     };
 
     private HashSet<string> BookedTimeSlots = new();
+    private List<Booking> bookings = new();
 
     [SupplyParameterFromForm(FormName = "createBooking")]
     private Booking Booking { get; set; } = new()
@@ -98,77 +97,56 @@
         using var context = DbFactory.CreateDbContext();
         Subjects = await context.Subjects.ToListAsync();
         Tutors = await context.Tutors.ToListAsync();
-
-        // Get the authenticated user details
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        AuthenticatedUserId = user.FindFirst("userId")?.Value ?? string.Empty;
-        AuthenticatedUserName = user.FindFirst("FirstName")?.Value ?? "Anonymous";
+        bookings = await context.Booking.ToListAsync();
     }
 
-    private async Task OnTutorChanged(ChangeEventArgs e)
+    private void LoadBookedTimeSlots()
     {
-        SelectedTutorId = int.Parse(e.Value.ToString());
-        await LoadBookedTimeSlots();
-    }
-
-    private async Task OnDateChanged(ChangeEventArgs e)
-    {
-        await LoadBookedTimeSlots();
-    }
-
-    private async Task LoadBookedTimeSlots()
-    {
-        if (Booking.Date == default || SelectedTutorId == 0)
-            return;
-
-        using var context = DbFactory.CreateDbContext();
-
-        BookedTimeSlots = (await context.Booking
-            .Where(b => b.Date == Booking.Date && b.TutorId == SelectedTutorId)
-            .Select(b => b.Time)
-            .ToListAsync())
-            .ToHashSet();
-
-        StateHasChanged(); // Ensure the UI updates
+        foreach (var b in bookings)
+        {
+            if (b.Date == Booking.Date && b.TutorId == Booking.TutorId)
+            {
+                BookedTimeSlots.Add(b.Time);
+            }
+        }
     }
 
     private async Task AddBooking()
     {
-        using var context = DbFactory.CreateDbContext();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        string userName = user.FindFirst("FirstName")?.Value ?? "Anonymous";
 
-        // ❌ Prevent double booking
-        bool isTimeSlotTaken = await context.Booking
-            .AnyAsync(b => b.Date == Booking.Date && b.Time == Booking.Time && b.TutorId == SelectedTutorId);
-
-        if (isTimeSlotTaken)
+        var tutor = Tutors.FirstOrDefault(t => t.Name == tutorName);
+        if (tutor != null)
         {
-            Console.WriteLine("❌ This time slot is already booked. Please select a different time.");
+            Booking.TutorId = tutor.TutorId;
+        }
+        else
+        {
+            Console.WriteLine("No matching tutor found for the selected name.");
             return;
         }
 
-        // ✅ Ensure valid tutor selection
-        var tutor = Tutors.FirstOrDefault(t => t.TutorId == SelectedTutorId);
-        if (tutor == null)
+        Booking.StudentUserId = 1;
+
+        foreach (var b in bookings)
         {
-            Console.WriteLine("No matching tutor found.");
-            return;
+            if (b.TutorId == Booking.TutorId && b.Time == Booking.Time)
+            {
+                Console.WriteLine("❌ This time slot is already booked. Please select a different time.");
+                return;
+            }
         }
 
-        Booking.TutorId = tutor.TutorId;
-        Booking.StudentUserId = 1; // TODO: Change this dynamically if needed
-        Booking.CreatedBy = AuthenticatedUserName;
-        Booking.UpdatedBy = AuthenticatedUserName;
+        Booking.CreatedBy = userName;
+        Booking.UpdatedBy = userName;
         Booking.DateCreated = DateTime.UtcNow;
         Booking.DateUpdated = DateTime.UtcNow;
         Booking.Status = "Confirmed";
 
-        Console.WriteLine($"User: {AuthenticatedUserName}");
-        Console.WriteLine($"TutorId: {Booking.TutorId}");
-        Console.WriteLine($"Date: {Booking.Date}");
-        Console.WriteLine($"Time: {Booking.Time}");
-
         Console.WriteLine("Saving Booking...");
+        using var context = DbFactory.CreateDbContext();
         context.Booking.Add(Booking);
         await context.SaveChangesAsync();
         Console.WriteLine("Booking Saved!");

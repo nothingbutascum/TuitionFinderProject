@@ -1,43 +1,69 @@
 ﻿@page "/bookings"
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
+@using Microsoft.AspNetCore.Components.Authorization
 @using FSDProject1.Domain
 @using FSDProject1.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Bookings</PageTitle>
 
-<h1>Index</h1>
+<h1>Bookings</h1>
 
 <p>
     <a href="bookings/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Booking">
-    <PropertyColumn Property="booking => booking.Date" />
-    <PropertyColumn Property="booking => booking.Time" />
-    <PropertyColumn Property="booking => booking.Status" />
-    <PropertyColumn Property="booking => booking.DateCreated" />
-    <PropertyColumn Property="booking => booking.DateUpdated" />
-    <PropertyColumn Property="booking => booking.CreatedBy" />
-    <PropertyColumn Property="booking => booking.UpdatedBy" />
-    <PropertyColumn Property="booking => booking.StudentUserId" />
-    <PropertyColumn Property="booking => booking.TutorId" />
-
-    <TemplateColumn Context="booking">
-        <a href="@($"bookings/edit?bookingid={booking.BookingID}")">Edit</a> |
-        <a href="@($"bookings/details?bookingid={booking.BookingID}")">Details</a> |
-        <a href="@($"bookings/delete?bookingid={booking.BookingID}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+@if (bookings == null)
+{
+    <p>Loading bookings...</p>
+}
+else if (!bookings.Any())
+{
+    <p>No bookings available.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Student</th>
+                <th>Tutor</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in bookings)
+            {
+                <tr>
+                    <td>@booking.Date</td>
+                    <td>@booking.Time</td>
+                    <td>@booking.Status</td>
+                    <td>@booking.StudentUserId</td>
+                    <td>@booking.TutorId</td>
+                    <td>
+                        <a href="@($"bookings/edit?bookingid={booking.BookingID}")">Edit</a> |
+                        <a href="@($"bookings/details?bookingid={booking.BookingID}")">Details</a> |
+                        <a href="@($"bookings/delete?bookingid={booking.BookingID}")">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
     private FSDProject1Context context = default!;
+    private List<Booking>? bookings;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         context = DbFactory.CreateDbContext();
+        bookings = await context.Booking.ToListAsync();
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

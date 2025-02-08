@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @rendermode InteractiveServer
+@inject IJSRuntime JS
 
 <PageTitle>Create Booking</PageTitle>
 
@@ -99,6 +100,10 @@
         Tutors = await context.Tutors.ToListAsync();
         bookings = await context.Booking.ToListAsync();
     }
+    private async Task ShowAlert(string message)
+    {
+        await JS.InvokeVoidAsync("alert", message);
+    }
 
     private void LoadBookedTimeSlots()
     {
@@ -135,6 +140,7 @@
             if (b.TutorId == Booking.TutorId && b.Time == Booking.Time)
             {
                 Console.WriteLine("❌ This time slot is already booked. Please select a different time.");
+                await ShowAlert("This time slot is already booked. Please select a different time.");
                 return;
             }
         }

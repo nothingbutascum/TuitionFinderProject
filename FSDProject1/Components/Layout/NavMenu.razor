@@ -3,20 +3,29 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<header>
+<header class="navbar">
     <div class="logo">
         <img src="/images/ht.png" alt="Hawk Tuition Finder Logo" />
     </div>
+
     <nav class="navigation">
-        <ul>
-            <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
-            <li><NavLink href="about">About Us</NavLink></li>
+        <ul class="nav-links">
+            <li><NavLink href="/" Match="NavLinkMatch.All">Home</NavLink></li>
+            <li><NavLink href="/about">About Us</NavLink></li>
             <li><NavLink href="/bookings/create">Booking</NavLink></li>
             <li><NavLink href="/reviews/create">Contact Us</NavLink></li>
 
             @if (isAdmin)
             {
-                <li><NavLink href="/tutors/create">Manage Tutors</NavLink></li>
+                <li class="dropdown">
+                    <span class="dropdown-toggle">Manage</span>
+                    <ul class="dropdown-menu">
+                        <li><NavLink href="/tutors">Manage Tutors</NavLink></li>
+                        <li><NavLink href="/students">Manage Students</NavLink></li>
+                        <li><NavLink href="/bookings">Manage Bookings</NavLink></li>
+                        <li><NavLink href="/reviews">View Reviews</NavLink></li>
+                    </ul>
+                </li>
             }
         </ul>
     </nav>
@@ -24,7 +33,7 @@
     <AuthorizeView>
         <Authorized>
             <div class="auth-buttons">
-                <NavLink href="Account/Manage">@context.User.Identity?.Name</NavLink>
+                <NavLink href="Account/Manage" class="username">@context.User.Identity?.Name</NavLink>
                 <form action="Account/Logout" method="post" class="d-inline">
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="@currentUrl" />
@@ -34,18 +43,20 @@
         </Authorized>
         <NotAuthorized>
             <div class="auth-buttons">
-                <NavLink href="Account/Login">Login</NavLink>
-                <NavLink href="Account/Register">Register</NavLink>
+                <NavLink href="Account/Login" class="auth-link">Login</NavLink>
+                <NavLink href="Account/Register" class="auth-link">Register</NavLink>
             </div>
         </NotAuthorized>
     </AuthorizeView>
 </header>
 
+<!-- 🌟 Improved Navigation Styling -->
 <style>
-    header {
+    /* 🔹 NAVBAR */
+    .navbar {
         background: linear-gradient(90deg, #004e92, #000428);
         color: white;
-        padding: 10px 30px;
+        padding: 15px 40px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         position: sticky;
         top: 0;
@@ -53,83 +64,157 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        font-family: Arial, sans-serif;
     }
 
+    /* 🔹 LOGO */
     .logo img {
-        height: 120px;
+        height: 100px;
         width: auto;
     }
 
-    .navigation ul {
+    /* 🔹 NAVIGATION */
+    .nav-links {
         list-style: none;
         padding: 0;
         margin: 0;
         display: flex;
-        gap: 30px;
+        gap: 25px;
     }
 
-    .navigation ::deep a {
+        .nav-links li {
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+            .nav-links a:hover {
+                color: #ffcd3c;
+            }
+
+    /* 🔹 DROPDOWN MENU */
+    .dropdown {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .dropdown-toggle {
         color: white;
-        text-decoration: none;
+        text-transform: uppercase;
         font-size: 1.1em;
         font-weight: 500;
-        text-transform: uppercase;
+        padding: 10px;
+        cursor: pointer;
         transition: color 0.3s ease;
     }
 
-        .navigation ::deep a:hover {
+        .dropdown-toggle:hover {
             color: #ffcd3c;
         }
 
-    /* Auth Buttons */
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        background: white;
+        min-width: 180px;
+        border-radius: 5px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        padding: 0;
+    }
+
+        .dropdown-menu li {
+            list-style: none;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .dropdown-menu a {
+            color: black;
+            text-decoration: none;
+            font-size: 1em;
+            display: block;
+            padding: 10px;
+        }
+
+            .dropdown-menu a:hover {
+                background: #f5f5f5;
+                border-radius: 5px;
+            }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    /* 🔹 AUTH BUTTONS */
     .auth-buttons {
         display: flex;
         gap: 15px;
         align-items: center;
     }
 
-        .auth-buttons ::deep a,
-        .logout-button {
-            font-size: 0.9em;
-            padding: 8px 20px;
-            text-transform: uppercase;
-            font-weight: 600;
-            border: 2px solid white;
-            border-radius: 30px;
-            text-decoration: none;
-            color: white;
-            background: transparent;
-            transition: all 0.3s ease-in-out;
-            cursor: pointer;
+    .username {
+        font-size: 1em;
+        font-weight: bold;
+        color: #ffcd3c;
+        text-transform: uppercase;
+        padding-right: 10px;
+    }
+
+    .auth-link,
+    .logout-button {
+        font-size: 0.9em;
+        padding: 8px 18px;
+        text-transform: uppercase;
+        font-weight: 600;
+        border: 2px solid white;
+        border-radius: 30px;
+        text-decoration: none;
+        color: white;
+        background: transparent;
+        transition: all 0.3s ease-in-out;
+        cursor: pointer;
+    }
+
+        .auth-link:hover,
+        .logout-button:hover {
+            background-color: white;
+            color: #004e92;
         }
 
-            .auth-buttons ::deep a:hover,
-            .logout-button:hover {
-                background-color: white;
-                color: #004e92;
-            }
-
-    /* Responsive Design */
+    /* 🔹 RESPONSIVE DESIGN */
     @@media (max-width: 768px) {
-        header {
-            flex-direction: column;
-            padding: 10px;
-        }
+        .navbar
 
-        .logo img {
-            height: 80px;
-        }
+    {
+        flex-direction: column;
+        padding: 10px;
+    }
 
-        .navigation ul {
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
-            margin: 10px 0;
-        }
+    .logo img {
+        height: 80px;
+    }
 
-        .auth-buttons {
-            margin-top: 10px;
-        }
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .auth-buttons {
+        margin-top: 10px;
+    }
+
     }
 </style>
 

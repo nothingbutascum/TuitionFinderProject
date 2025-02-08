@@ -4,6 +4,7 @@ using FSDProject1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FSDProject1.Migrations
 {
     [DbContext(typeof(FSDProject1Context))]
-    partial class FSDProject1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250208132517_bookingtimingcacat")]
+    partial class bookingtimingcacat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,7 +193,7 @@ namespace FSDProject1.Migrations
 
                     b.Property<string>("Time")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("TutorId")
                         .HasColumnType("int");
@@ -203,7 +206,8 @@ namespace FSDProject1.Migrations
 
                     b.HasIndex("StudentUserId");
 
-                    b.HasIndex("TutorId");
+                    b.HasIndex("TutorId", "Date", "Time")
+                        .IsUnique();
 
                     b.ToTable("Booking");
 

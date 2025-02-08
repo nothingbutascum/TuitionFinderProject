@@ -6,8 +6,13 @@ using FSDProject1.Domain;
 
 namespace FSDProject1.Data
 {
-    public class FSDProject1Context(DbContextOptions<FSDProject1Context> options) : IdentityDbContext<FSDProject1User>(options)
+    public class FSDProject1Context : IdentityDbContext<FSDProject1User>
     {
+        public FSDProject1Context(DbContextOptions<FSDProject1Context> options)
+            : base(options)
+        {
+        }
+
         public DbSet<FSDProject1.Domain.Booking> Booking { get; set; } = default!;
         public DbSet<FSDProject1.Domain.Reviews> Reviews { get; set; } = default!;
         public DbSet<FSDProject1.Domain.StudentUser> StudentUser { get; set; } = default!;
@@ -32,7 +37,16 @@ namespace FSDProject1.Data
                 .HasOne(s => s.Tutor)
                 .WithMany() // No back-reference needed
                 .HasForeignKey(s => s.TutorId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent accidental deletion
+                .OnDelete(DeleteBehavior.Cascade); // 🔹 Ensures subjects are deleted when tutor is deleted
+
+            // ✅ One-to-Many Relationship (Bookings linked to Tutors)
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.Tutor)
+                .WithMany() // No explicit navigation property in Tutor
+                .HasForeignKey(b => b.TutorId)
+                .OnDelete(DeleteBehavior.Cascade); // 🔹 Ensures bookings are deleted when tutor is deleted
+           // ✅ Enforce Unique Constraint on Bookings
+           
 
             // ✅ Many-to-Many Relationship (Subjects <-> Tutors)
             modelBuilder.Entity<Tutors>()

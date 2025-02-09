@@ -4,6 +4,7 @@ using FSDProject1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FSDProject1.Migrations
 {
     [DbContext(typeof(FSDProject1Context))]
-    partial class FSDProject1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250209100928_AddSubjectNametoBooking")]
+    partial class AddSubjectNametoBooking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,6 +191,10 @@ namespace FSDProject1.Migrations
                     b.Property<int>("StudentUserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("SubjectName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Time")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -217,6 +224,7 @@ namespace FSDProject1.Migrations
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Confirmed",
                             StudentUserId = 1,
+                            SubjectName = "",
                             Time = "10:00",
                             TutorId = 1,
                             UpdatedBy = "SystemAdmin"
@@ -230,6 +238,7 @@ namespace FSDProject1.Migrations
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Pending",
                             StudentUserId = 2,
+                            SubjectName = "",
                             Time = "14:00",
                             TutorId = 2,
                             UpdatedBy = "AdminUser"
@@ -243,6 +252,7 @@ namespace FSDProject1.Migrations
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Cancelled",
                             StudentUserId = 3,
+                            SubjectName = "",
                             Time = "16:00",
                             TutorId = 3,
                             UpdatedBy = "AdminAssistant"
@@ -406,15 +416,10 @@ namespace FSDProject1.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TutorId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectId");
-
-                    b.HasIndex("TutorId");
 
                     b.ToTable("Subjects");
 
@@ -426,7 +431,6 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Mathematics",
-                            TutorId = 1,
                             UpdatedBy = "SystemAdmin"
                         },
                         new
@@ -436,7 +440,6 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Physics",
-                            TutorId = 1,
                             UpdatedBy = "AdminUser"
                         },
                         new
@@ -446,7 +449,6 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Chemistry",
-                            TutorId = 3,
                             UpdatedBy = "AdminAssistant"
                         });
                 });
@@ -673,21 +675,6 @@ namespace FSDProject1.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TutorSubject", b =>
-                {
-                    b.Property<int>("SubjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TutorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SubjectId", "TutorId");
-
-                    b.HasIndex("TutorId");
-
-                    b.ToTable("TutorSubject");
-                });
-
             modelBuilder.Entity("FSDProject1.Domain.AdminTutor", b =>
                 {
                     b.HasOne("FSDProject1.Domain.Subjects", "Subject")
@@ -735,17 +722,6 @@ namespace FSDProject1.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
-                });
-
-            modelBuilder.Entity("FSDProject1.Domain.Subjects", b =>
-                {
-                    b.HasOne("FSDProject1.Domain.Tutors", "Tutor")
-                        .WithMany()
-                        .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tutor");
                 });
 
             modelBuilder.Entity("FSDProject1.Domain.Tutors", b =>
@@ -804,21 +780,6 @@ namespace FSDProject1.Migrations
                     b.HasOne("FSDProject1.Data.FSDProject1User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TutorSubject", b =>
-                {
-                    b.HasOne("FSDProject1.Domain.Subjects", null)
-                        .WithMany()
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FSDProject1.Domain.Tutors", null)
-                        .WithMany()
-                        .HasForeignKey("TutorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

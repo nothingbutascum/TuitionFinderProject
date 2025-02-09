@@ -54,7 +54,7 @@
                                         <td>@booking.StudentUser.Name</td>
                                         <td>@booking.Tutor.Name</td>
                                         <td>@booking.Date.ToShortDateString()</td>
-                                        <td>@booking.Time</td>
+
                                         <td class="status">@booking.Status</td>
                                     </tr>
                                 }
@@ -245,13 +245,9 @@
         TotalTutors = await context.Tutors.CountAsync();
         TotalStudents = await context.StudentUser.CountAsync();
         TotalBookings = await context.Booking.CountAsync();
-        
 
-        RecentBookings = await context.Booking
-            .Include(b => b.StudentUser)
-            .Include(b => b.Tutor)
-            .OrderByDescending(b => b.DateCreated)
-            .Take(5)
-            .ToListAsync();
+
+
+
     }
 }

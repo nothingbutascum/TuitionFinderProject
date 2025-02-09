@@ -1,0 +1,89 @@
+﻿@page "/bookings/studentmanage"
+@using Microsoft.EntityFrameworkCore
+@using FSDProject1.Domain
+@using FSDProject1.Data
+@inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<PageTitle>Student Bookings</PageTitle>
+
+<h1>Student Bookings</h1>
+
+<p>
+    <a href="bookings/create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Date Created</th>
+            <th>Modify</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (studentBookings == null || !studentBookings.Any())
+        {
+            <tr>
+                <td colspan="10" class="no-data">No bookings available.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var booking in studentBookings)
+            {
+                <tr>
+                    <td>@booking.Date</td>
+                    <td>@booking.Time</td>
+                    <td>@booking.Status</td>
+                    <td>@booking.DateCreated</td>
+                    
+                    
+                    <td>
+                        
+                        <a href="@($"bookings/details?bookingid={booking.BookingID}")">Details</a> |
+
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Booking>? studentBookings;
+    private FSDProject1Context context = default!;
+    private string userEmail;
+    private int userID;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        context = DbFactory.CreateDbContext();
+
+        userEmail = user.FindFirst(ClaimTypes.Email)?.Value;
+
+        // Retrieve the StudentUser based on the email
+        var student = await context.StudentUser.FirstOrDefaultAsync(s => s.Email == userEmail);
+
+        if (student != null)
+        {
+            userID = student.StudentUserId;
+        }
+
+        // Query student bookings using the correct comparison operator (==)
+        studentBookings = await context.Booking
+            .Where(sBooking => sBooking.StudentUserId == userID)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

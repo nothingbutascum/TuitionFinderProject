@@ -27,7 +27,7 @@ namespace FSDProject1.Configurations.Entities
                     DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, DateTimeKind.Utc), // Static value
                     CreatedBy = "AdminUser",
                     UpdatedBy = "AdminUser",
-                    TutorId = 2
+                    TutorId = 1
                 },
                 new Subjects
                 {

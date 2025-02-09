@@ -5,7 +5,7 @@
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using System.Security.Claims 
+@using System.Security.Claims
 @rendermode InteractiveServer
 
 <PageTitle>Create Booking</PageTitle>
@@ -23,7 +23,7 @@
 
 <div class="row">
     <div class="col-md-4">
-        <EditForm Model="Booking" OnValidSubmit="AddBooking" FormName="createBooking">
+        <EditForm Model="Booking" OnValidSubmit="ShowConfirmationPopup" FormName="createBooking">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
 
@@ -80,12 +80,33 @@
     <a href="/bookings">Back to List</a>
 </div>
 
+<!-- Simple Blazor Pop-up for Confirmation -->
+@if (ShowPopup)
+{
+    <div class="popup-overlay">
+        <div class="popup-content">
+            <h5>Confirm Your Booking</h5>
+            <p><strong>Subject:</strong> @SelectedSubjectName</p>
+            <p><strong>Tutor:</strong> @SelectedTutorName</p>
+            <p><strong>Date:</strong> @Booking.Date.ToShortDateString()</p>
+            <p><strong>Time:</strong> @Booking.Time</p>
+            <div class="popup-buttons">
+                <button class="btn btn-secondary" @onclick="ClosePopup">Cancel</button>
+                <button class="btn btn-primary" @onclick="ConfirmBooking">Confirm</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Tutors> Tutors { get; set; } = new();
     private List<Subjects> Subjects { get; set; } = new();
     private int SelectedSubjectId { get; set; } = 0;
     private int SelectedTutorId { get; set; } = 0;
     private StudentUser StudentUser { get; set; } = new();
+    private string SelectedSubjectName { get; set; } = "";
+    private string SelectedTutorName { get; set; } = "";
+    private bool ShowPopup { get; set; } = false;
 
     private List<string> AvailableTimeSlots = new()
     {
@@ -129,8 +150,29 @@
             }
         }
     }
-    private string userEmail;
-    private string studentEmail;
+
+    private void ShowConfirmationPopup()
+    {
+        var subject = Subjects.FirstOrDefault(s => s.SubjectId == SelectedSubjectId);
+        var tutor = Tutors.FirstOrDefault(t => t.TutorId == SelectedTutorId);
+
+        SelectedSubjectName = subject?.Name ?? "N/A";
+        SelectedTutorName = tutor?.Name ?? "N/A";
+
+        ShowPopup = true;
+    }
+
+    private void ClosePopup()
+    {
+        ShowPopup = false;
+    }
+
+    private async Task ConfirmBooking()
+    {
+        ShowPopup = false;
+        await AddBooking();
+    }
+
     private async Task AddBooking()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -138,28 +180,17 @@
         string userName = user.FindFirst("FirstName")?.Value ?? "Anonymous";
 
         using var context = DbFactory.CreateDbContext();
-        bookings = await context.Booking.ToListAsync(); // Refresh bookings list
+        bookings = await context.Booking.ToListAsync();
 
         var tutor = Tutors.FirstOrDefault(t => t.TutorId == SelectedTutorId);
-        if (tutor == null)
-        {
-            Console.WriteLine($"❌ No matching tutor found for SelectedTutorId: {SelectedTutorId}");
-            return;
-        }
+        if (tutor == null) return;
 
         Booking.TutorId = tutor.TutorId;
-      
-        userEmail = user.FindFirst(ClaimTypes.Email)?.Value;
-        foreach(var student in studentUsers){
-            studentEmail = student.Email;
-            if (studentEmail == userEmail){
-                Booking.StudentUserId = student.StudentUserId;
-            }
-        }
 
+        var userEmail = user.FindFirst(ClaimTypes.Email)?.Value;
+        Booking.StudentUserId = studentUsers.FirstOrDefault(s => s.Email == userEmail)?.StudentUserId ?? 0;
 
-        // Check for duplicate bookings
-        if (bookings.Any(b => b.TutorId == Booking.TutorId && b.Time == Booking.Time && b.Date.Date == Booking.Date.Date ))
+        if (bookings.Any(b => b.TutorId == Booking.TutorId && b.Time == Booking.Time && b.Date.Date == Booking.Date.Date))
         {
             DuplicateBookingMessage = "❌ This time slot is already booked. Please select a different time.";
             return;

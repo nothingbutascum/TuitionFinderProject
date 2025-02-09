@@ -1,0 +1,114 @@
+﻿@page "/contact"
+
+<style>
+    .contact-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 40px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        text-align: center;
+    }
+
+        .contact-container h1 {
+            color: #004e92;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .contact-container p {
+            color: #555;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        font-size: 1.2rem;
+    }
+
+        .contact-info div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-info i {
+            font-size: 1.5rem;
+            color: #004e92;
+        }
+
+        .contact-info a {
+            text-decoration: none;
+            color: #004e92;
+            font-weight: bold;
+        }
+
+            .contact-info a:hover {
+                text-decoration: underline;
+            }
+
+    /* Review Section Styling */
+    .review-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 10px;
+    }
+
+        .review-section h2 {
+            color: #004e92;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+    .review-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        color: #ffffff;
+        background: #004e92;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+        .review-button:hover {
+            background: #003366;
+        }
+</style>
+
+<div class="contact-container">
+    <h1>Contact Us</h1>
+    <p>Have any questions? Reach out to us, and we'll get back to you as soon as possible.</p>
+
+    <!-- Contact Information -->
+    <div class="contact-info">
+        <div>
+            <i class="fas fa-envelope"></i>
+            <span>Email: <a href="mailto:support@hawktuitionfinder.com">support@hawktuitionfinder.com</a></span>
+        </div>
+        <div>
+            <i class="fas fa-phone-alt"></i>
+            <span>
+                Phone:
+                <a href="https://wa.me/6581863520" target="_blank">
+                    +65 8186 3520
+                </a>
+            </span>
+        </div>
+    </div>
+
+    <!-- Leave a Review Section -->
+    <div class="review-section">
+        <h2>Leave a Review</h2>
+        <p>We value your feedback! Help us improve by leaving a review.</p>
+        <a href="/reviews/create" class="review-button">Leave a Review</a>
+    </div>
+</div>

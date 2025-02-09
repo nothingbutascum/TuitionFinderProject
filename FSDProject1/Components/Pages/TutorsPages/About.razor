@@ -1,0 +1,124 @@
+﻿@page "/about"
+
+<!-- Add Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
+
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Baloo 2', cursive;
+        background-color: #f9f9f9;
+    }
+
+    .about-container {
+        max-width: 1000px;
+        margin: 50px auto;
+        padding: 40px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        text-align: center;
+    }
+
+        .about-container h1 {
+            font-family: 'Pacifico', cursive;
+            color: #ff6f61;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .about-container p {
+            color: #444;
+            font-size: 1.3rem;
+            font-family: 'Baloo 2', cursive;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+    .about-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 10px;
+        margin: 30px 0;
+    }
+
+    /* Features Section */
+    .features {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .feature-card {
+        max-width: 280px;
+        text-align: center;
+        padding: 20px;
+        background: #f4f4f4;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ff6f61;
+            font-family: 'Pacifico', cursive;
+            text-transform: uppercase;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 1rem;
+            font-family: 'Baloo 2', cursive;
+        }
+</style>
+
+<div class="about-container">
+    <h1>About Us</h1>
+    <p>
+        Welcome to <strong>Hawk Tuition Finder</strong>. Our mission is to help students
+        <strong>love learning</strong> by connecting them with <strong>expert tutors</strong> in a fun and engaging way.
+        Whether you need help with a subject, preparing for exams, or improving specific skills,
+        we are here to <strong>make learning exciting!</strong>
+    </p>
+
+    <!-- Hero Image -->
+    <img src="/images/studentslearning.jpg" alt="Students Learning" class="about-image">
+
+    <!-- Features Section -->
+    <div class="features">
+        <div class="feature-card">
+            <img src="/images/people.jpg" alt="Expert Tutors">
+            <h3>Expert Tutors</h3>
+            <p>Get guidance from highly qualified and experienced tutors.</p>
+        </div>
+        <div class="feature-card">
+            <img src="/images/flexiblelearning.jpg" alt="Flexible Learning">
+            <h3>Flexible Learning</h3>
+            <p>Book lessons at your convenience, anytime, anywhere.</p>
+        </div>
+        <div class="feature-card">
+            <img src="/images/personalized.jpg" alt="Personalized Support">
+            <h3>Personalized Support</h3>
+            <p>Receive a customized learning experience tailored to your needs.</p>
+        </div>
+    </div>
+</div>

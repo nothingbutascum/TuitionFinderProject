@@ -20,190 +20,155 @@
 <NavMenu />
 
 <style>
-    /* Custom CSS for the header */
-    .custom-header {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        font-size: 2rem;
-        color: #fff;
-    }
-
-    /* Ensure the rest of the form uses a clean font */
+    /* General Styles */
     body {
         font-family: 'Poppins', sans-serif;
         margin: 0;
         padding: 0;
         height: 100vh;
-        background-image: url('/images/background.jpg'); /* Add your background image path here */
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        background-color: #f8f9fa;
     }
 
-    /* Login Container */
     .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    .login-box {
+        display: flex;
+        max-width: 900px;
         width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 2rem;
+        background-color: #fff;
         border-radius: 10px;
-        background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
 
-    /* Input Group */
-    .input-group {
-        margin-bottom: 1.5rem;
+    .image-section {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e6e6e6;
     }
 
-        .input-group label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #2d2d2d;
-            margin-bottom: 0.5rem;
+        .image-section img {
+            max-width: 100%;
+            height: auto;
             display: block;
         }
 
-        .input-group input {
+    .form-section {
+        flex: 1;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+
+        .form-group label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d2d2d;
+            display: block;
+        }
+
+        .form-group input {
             width: 100%;
             padding: 0.75rem;
             font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            outline: none;
+            background: transparent;
         }
 
-    /* Buttons */
-    .btn {
+    .btn-primary {
         width: 100%;
         padding: 0.75rem;
         font-size: 1rem;
         font-weight: 600;
         border-radius: 5px;
-        text-align: center;
-        text-decoration: none;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        border: none;
-    }
-
-    .btn-primary {
-        background-color: #004e92;
+        background-color: #6a5acd;
         color: white;
+        border: none;
+        cursor: pointer;
     }
 
         .btn-primary:hover {
-            background-color: #003366;
+            background-color: #483d8b;
         }
 
-    .btn-secondary {
-        background-color: #f0f0f0;
-        color: #004e92;
-        border: 1px solid #004e92;
-    }
-
-        .btn-secondary:hover {
-            background-color: #004e92;
-            color: white;
-        }
-
-    /* Error Message */
-    .error-message {
-        color: #dc3545;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-    }
-
-    /* Links */
     .forgot-password {
         text-align: center;
         margin-top: 1rem;
     }
 
         .forgot-password a {
-            color: #004e92;
+            color: #6a5acd;
             text-decoration: none;
         }
 
             .forgot-password a:hover {
                 text-decoration: underline;
             }
-
-    /* Spacing for the login form */
-    .login-form {
-        margin-top: 2rem;
-    }
 </style>
 
 <!-- Login Form -->
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm login-container">
-                <div class="card-header bg-primary text-white text-center">
-                    <h2 class="mb-0 custom-header">Log in</h2>
+<div class="login-container">
+    <div class="login-box">
+        <div class="image-section">
+            <img src="/images/tutor.jpg" alt="Tutor Image" onerror="this.onerror=null; this.src='/images/placeholder.png'" />
+        </div>
+        <div class="form-section">
+            <h2>Login</h2>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="text-danger text-center mb-3">@errorMessage</div>
+            }
+
+            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger mb-3" role="alert" />
+
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <InputText id="email" @bind-Value="Input.Email" class="form-control" placeholder="name@example.com" />
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
                 </div>
-                <div class="card-body p-4 login-form">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="error-message">
-                            <span class="error-icon">!</span>
-                            @errorMessage
-                        </div>
-                    }
 
-                    <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary class="text-danger mb-3" role="alert" />
-
-                        <!-- Email Field -->
-                        <div class="input-group">
-                            <label for="email">Email</label>
-                            <InputText id="email"
-                                       @bind-Value="Input.Email"
-                                       class="form-control"
-                                       autocomplete="username"
-                                       aria-required="true"
-                                       placeholder="name@example.com" />
-                            <ValidationMessage For="() => Input.Email" class="text-danger" />
-                        </div>
-
-                        <!-- Password Field -->
-                        <div class="input-group">
-                            <label for="password">Password</label>
-                            <InputText id="password"
-                                       type="password"
-                                       @bind-Value="Input.Password"
-                                       class="form-control"
-                                       autocomplete="current-password"
-                                       aria-required="true" />
-                            <ValidationMessage For="() => Input.Password" class="text-danger" />
-                        </div>
-
-                        <!-- Remember Me Checkbox -->
-                        <div class="form-check mb-3">
-                            <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
-                            <label class="form-check-label" for="rememberMe">Remember me</label>
-                        </div>
-
-                        <!-- Login Button -->
-                        <button type="submit" class="btn btn-primary">Sign In</button>
-
-                        <!-- Register Link -->
-                        <div class="text-center mt-3">
-                            <a href="/Account/Register" class="btn btn-secondary">Register</a>
-                        </div>
-
-                        <!-- Forgot Password Link -->
-                        <div class="forgot-password">
-                            <a href="/Account/ForgotPassword">Forgot your password?</a>
-                        </div>
-                    </EditForm>
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <InputText id="password" type="password" @bind-Value="Input.Password" class="form-control" />
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
                 </div>
-            </div>
+
+                <!-- Login Button -->
+                <button type="submit" class="btn-primary">Login</button>
+
+                <!-- Forgot Password Link -->
+                <div class="forgot-password">
+                    <a href="/Account/ForgotPassword">Forgot Password?</a>
+                </div>
+            </EditForm>
         </div>
     </div>
 </div>
+
+
+
+
 
 @code {
     private string? errorMessage;

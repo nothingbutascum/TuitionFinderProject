@@ -7,89 +7,164 @@
 
 <PageTitle>Create Review</PageTitle>
 
-<h1>Create Review</h1>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Review" OnValidSubmit="AddReview" FormName="createReview">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
+<style>
+    .review-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 30px;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        text-align: center;
+    }
 
-            <!-- Rating Field -->
-            <div class="mb-3">
-                <label for="rating" class="form-label">Rating (1-5):</label>
-                <InputNumber id="rating" @bind-Value="Review.Rating" class="form-control" min="1" max="5" />
-                <ValidationMessage For="() => Review.Rating" class="text-danger" />
-            </div>
+        .review-container h1 {
+            color: #004e92;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
 
-            <!-- Comments Field -->
-            <div class="mb-3">
-                <label for="comments" class="form-label">Comments:</label>
-                <InputText id="comments" @bind-Value="Review.Comments" class="form-control" />
-                <ValidationMessage For="() => Review.Comments" class="text-danger" />
-            </div>
+    .form-group {
+        text-align: left;
+        margin-bottom: 15px;
+    }
 
-            <!-- Booking ID (Hidden Field, Only for the Logged-In User's Bookings) -->
-            <div class="mb-3">
-                <label for="bookingid" class="form-label">Booking ID:</label>
-                <InputNumber id="bookingid" @bind-Value="Review.BookingId" class="form-control" disabled />
-            </div>
+    .form-label {
+        font-weight: bold;
+        color: #333;
+    }
 
-            <button type="submit" class="btn btn-primary">Submit Review</button>
-        </EditForm>
-    </div>
-</div>
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
 
-<div>
-    <a href="/bookings">Back to List</a>
+    .btn-submit {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        color: #ffffff;
+        background: #004e92;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+        .btn-submit:hover {
+            background: #003366;
+        }
+
+    .back-link {
+        display: block;
+        margin-top: 15px;
+        text-decoration: none;
+        color: #004e92;
+        font-weight: bold;
+    }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="review-container">
+    <h1>Create a Review</h1>
+
+    <EditForm Model="Review" OnValidSubmit="AddReview" FormName="createReview">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" role="alert" />
+
+        <!-- Booking ID Input -->
+        <div class="form-group">
+            <label class="form-label">Booking ID:</label>
+            <InputNumber class="form-control" @bind-Value="Review.BookingId" />
+            <ValidationMessage For="() => Review.BookingId" class="text-danger" />
+        </div>
+
+        <!-- Rating Dropdown -->
+        <div class="form-group">
+            <label class="form-label">Rating:</label>
+            <select class="form-control" @bind="Review.Rating">
+                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                <option value="4">⭐⭐⭐⭐ Good</option>
+                <option value="3">⭐⭐⭐ Average</option>
+                <option value="2">⭐⭐ Poor</option>
+                <option value="1">⭐ Very Poor</option>
+            </select>
+            <ValidationMessage For="() => Review.Rating" class="text-danger" />
+        </div>
+
+        <!-- Comments Field -->
+        <div class="form-group">
+            <label for="comments" class="form-label">Comments:</label>
+            <InputTextArea id="comments" @bind-Value="Review.Comments" class="form-control" rows="4" />
+            <ValidationMessage For="() => Review.Comments" class="text-danger" />
+        </div>
+
+        <button type="submit" class="btn-submit">Submit Review</button>
+    </EditForm>
+
+    <a href="/bookings" class="back-link">Back to List</a>
 </div>
 
 @code {
     private Reviews Review { get; set; } = new();
-    private List<Booking> UserBookings { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        // Retrieve the user ID from the logged-in user's claim
-        var userIdString = user.FindFirst("userId")?.Value;
-        if (!string.IsNullOrEmpty(userIdString) && int.TryParse(userIdString, out int userId))
+        if (user.Identity.IsAuthenticated)
         {
-            // Get the bookings made by the logged-in user
-            using var context = DbFactory.CreateDbContext();
-            UserBookings = await context.Booking.Where(b => b.StudentUserId == userId).ToListAsync();
+            Review.CreatedBy = user.FindFirst("FirstName")?.Value ?? "Anonymous";
         }
     }
 
     private async Task AddReview()
     {
-        // Validate if the review is being made for a valid booking
-        if (Review.BookingId == 0 || !UserBookings.Any(b => b.BookingID == Review.BookingId))
-        {
-            Console.WriteLine("Invalid Booking ID or the booking does not belong to the logged-in user.");
-            return; // Stop execution if the booking ID is invalid or does not belong to the user
-        }
-
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        string userName = user.FindFirst("FirstName")?.Value ?? "Anonymous"; // Use FirstName for CreatedBy
-
-        // Add the review's properties
-        Review.CreatedBy = userName;
-        Review.UpdatedBy = userName;
-        Review.DateCreated = DateTime.UtcNow;
-        Review.DateUpdated = DateTime.UtcNow;
-
-        // Save the review
         using var context = DbFactory.CreateDbContext();
-        context.Reviews.Add(Review);
-        await context.SaveChangesAsync();
 
-        Console.WriteLine("Review Saved!");
+        try
+        {
+            // Validate Rating
+            if (!int.TryParse(Review.Rating, out int ratingValue) || ratingValue < 1 || ratingValue > 5)
+            {
+                Console.WriteLine("Invalid rating selected.");
+                return;
+            }
 
-        // Redirect to the reviews list page
-        NavigationManager.NavigateTo("/reviews");
+            // Validate Booking ID (User must enter a valid booking)
+            var booking = await context.Booking.FirstOrDefaultAsync(b => b.BookingID == Review.BookingId);
+            if (booking == null)
+            {
+                Console.WriteLine("Invalid Booking ID. No matching record found.");
+                return;
+            }
+
+            // Set Final Review Details
+            Review.Rating = ratingValue.ToString();
+            Review.DateCreated = DateTime.UtcNow;
+            Review.DateUpdated = DateTime.UtcNow;
+
+            Console.WriteLine($"Saving Review: Booking ID = {Review.BookingId}, Rating = {Review.Rating}");
+
+            // Save to Database
+            context.Reviews.Add(Review);
+            await context.SaveChangesAsync();
+
+            Console.WriteLine("Review Saved Successfully!");
+
+            // Redirect to reviews page
+            NavigationManager.NavigateTo("/reviews");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving review: {ex.Message}");
+        }
     }
 }

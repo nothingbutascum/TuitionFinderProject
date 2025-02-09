@@ -1,4 +1,4 @@
-﻿@page "/bookings/create"
+﻿@page "/bookings/create" 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using FSDProject1.Domain
@@ -34,13 +34,13 @@
 
             <div class="mb-3">
                 <label for="tutorid" class="form-label">Select Tutor:</label>
-                <InputSelect id="tutorid" @bind-Value="tutorName" class="form-control">
+                <InputSelect id="tutorid" @bind-Value="SelectedTutorId" class="form-control">
                     <option value="" disabled>Select a tutor</option>
                     @if (Tutors != null && Tutors.Any())
                     {
                         foreach (var tutor in Tutors)
                         {
-                            <option value="@tutor.Name">@tutor.Name</option>
+                            <option value="@tutor.TutorId">@tutor.Name</option>
                         }
                     }
                 </InputSelect>
@@ -75,7 +75,7 @@
     private List<Tutors> Tutors { get; set; } = new();
     private List<Subjects> Subjects { get; set; } = new();
     private int SelectedSubjectId { get; set; }
-    private string tutorName;
+    private int SelectedTutorId { get; set; }  // Changed from string tutorName to int SelectedTutorId
     private StudentUser StudentUser { get; set; } = new();
 
     private List<string> AvailableTimeSlots = new()
@@ -88,18 +88,21 @@
 
     [SupplyParameterFromForm(FormName = "createBooking")]
     private Booking Booking { get; set; } = new()
-        {
-            Date = DateTime.Now,
-            Status = "Confirmed"
-        };
+    {
+        Date = DateTime.Now,
+        Status = "Confirmed"
+    };
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
         Subjects = await context.Subjects.ToListAsync();
-        Tutors = await context.Tutors.ToListAsync();
+        Tutors = await context.Tutors.ToListAsync(); // ✅ Ensure tutors are correctly loaded
         bookings = await context.Booking.ToListAsync();
+
+        Console.WriteLine($"Loaded {Tutors.Count} tutors.");
     }
+
     private async Task ShowAlert(string message)
     {
         await JS.InvokeVoidAsync("alert", message);
@@ -122,25 +125,30 @@
         var user = authState.User;
         string userName = user.FindFirst("FirstName")?.Value ?? "Anonymous";
 
-        var tutor = Tutors.FirstOrDefault(t => t.Name == tutorName);
+        // Debugging Output - Check Selected Tutor ID
+        Console.WriteLine($"Selected Tutor ID: {SelectedTutorId}");
+
+        var tutor = Tutors.FirstOrDefault(t => t.TutorId == SelectedTutorId);
         if (tutor != null)
         {
             Booking.TutorId = tutor.TutorId;
         }
         else
         {
-            Console.WriteLine("No matching tutor found for the selected name.");
+            Console.WriteLine("❌ No matching tutor found for the selected ID.");
+            await ShowAlert("No matching tutor found for the selected tutor.");
             return;
         }
 
-        Booking.StudentUserId = 1;
+        Booking.StudentUserId = 1; // Replace this with actual user ID retrieval
 
+        // ✅ Fix: Allow same tutor and time but on different dates
         foreach (var b in bookings)
         {
-            if (b.TutorId == Booking.TutorId && b.Time == Booking.Time)
+            if (b.TutorId == Booking.TutorId && b.Time == Booking.Time && b.Date == Booking.Date)
             {
-                Console.WriteLine("❌ This time slot is already booked. Please select a different time.");
-                await ShowAlert("This time slot is already booked. Please select a different time.");
+                Console.WriteLine("❌ This time slot is already booked for the selected date. Please choose another.");
+                await ShowAlert("This time slot is already booked for the selected date. Please select a different time.");
                 return;
             }
         }

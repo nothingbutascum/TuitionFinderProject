@@ -51,10 +51,10 @@
                                 @foreach (var booking in RecentBookings)
                                 {
                                     <tr>
-                                        <td>@booking.StudentUser.Name</td>
-                                        <td>@booking.Tutor.Name</td>
+                                        <td>@(booking.StudentUser?.Name ?? "Unknown Student")</td>
+                                        <td>@(booking.Tutor?.Name ?? "Unknown Tutor")</td>
                                         <td>@booking.Date.ToShortDateString()</td>
-                                        <td>@booking.Time</td>
+                                        <td>@(booking.Time ?? "N/A")</td>
                                         <td class="status">@booking.Status</td>
                                     </tr>
                                 }
@@ -85,18 +85,15 @@
                     <h2>Why Choose Hawk Tuition Finder?</h2>
                     <div class="features-grid">
                         <div class="feature-card">
-                            <img src="/images/expert-tutors.png" alt="Expert Tutors">
-                            <h3>Expert Tutors</h3>
+                            <h3>📚 Expert Tutors</h3>
                             <p>Learn from the best educators in your field.</p>
                         </div>
                         <div class="feature-card">
-                            <img src="/images/flexible-learning.png" alt="Flexible Learning">
-                            <h3>Flexible Learning</h3>
+                            <h3>⏳ Flexible Learning</h3>
                             <p>Schedule sessions at your convenience.</p>
                         </div>
                         <div class="feature-card">
-                            <img src="/images/personalized.png" alt="Personalized Support">
-                            <h3>Personalized Support</h3>
+                            <h3>🎯 Personalized Support</h3>
                             <p>Get help tailored to your learning style.</p>
                         </div>
                     </div>
@@ -119,10 +116,16 @@
     </NotAuthorized>
 </AuthorizeView>
 
-<!-- 🌟 Updated Styling (Fixed Background & Admin UI) -->
+<!-- 🌟 Updated Styling -->
 <style>
-    /* ✅ FIXED Student Page Background (No More Gaps) */
+    /* ✅ Base Background (Blue Gradient) */
+    body {
+        background: linear-gradient(135deg, #1e3a8a, #0a192f);
+    }
+
+    /* ✅ Background Image Sits on Top of the Blue Hue */
     .hero-section {
+        position: relative;
         background: url('/images/10141608.jpg') center center / cover no-repeat;
         width: 100vw;
         height: 100vh;
@@ -132,7 +135,49 @@
         text-align: center;
         color: white;
         padding: 20px;
+        overflow: hidden;
     }
+
+    /* 📌 Ensures Proper Scaling on Mobile */
+    @@media (max-width: 768px) {
+        .hero-section
+
+    {
+        background-size: contain;
+    }
+
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 800px;
+        padding: 20px;
+        border-radius: 12px;
+        backdrop-filter: blur(5px);
+    }
+
+    .highlight {
+        color: #ffcd3c;
+    }
+
+    .cta-button {
+        display: inline-block;
+        padding: 15px 40px;
+        font-size: 1.2em;
+        font-weight: 600;
+        color: white;
+        background: #ff6f61;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+        .cta-button:hover {
+            background: #de3e44;
+        }
 
     .admin-dashboard {
         text-align: center;
@@ -141,47 +186,6 @@
         color: white;
         min-height: 100vh;
     }
-
-    .stats-grid {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-
-    .stat-box {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
-        padding: 20px;
-        font-size: 1.2em;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(10px);
-    }
-
-    .recent-bookings {
-        margin-top: 40px;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-        .recent-bookings table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .recent-bookings th, .recent-bookings td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .recent-bookings .status {
-            font-weight: bold;
-        }
 </style>
 
 @code {
@@ -200,7 +204,7 @@
         TotalTutors = await context.Tutors.CountAsync();
         TotalStudents = await context.StudentUser.CountAsync();
         TotalBookings = await context.Booking.CountAsync();
-       
+        
 
         RecentBookings = await context.Booking
             .Include(b => b.StudentUser)

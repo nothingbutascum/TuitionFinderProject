@@ -88,13 +88,13 @@
         <!-- Rating Dropdown -->
         <div class="form-group">
             <label class="form-label">Rating:</label>
-            <select class="form-control" @bind="Review.Rating">
+            <InputSelect class="form-control" @bind-Value="Review.Rating">
                 <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
                 <option value="4">⭐⭐⭐⭐ Good</option>
                 <option value="3">⭐⭐⭐ Average</option>
                 <option value="2">⭐⭐ Poor</option>
                 <option value="1">⭐ Very Poor</option>
-            </select>
+            </InputSelect>
             <ValidationMessage For="() => Review.Rating" class="text-danger" />
         </div>
 
@@ -112,6 +112,7 @@
 </div>
 
 @code {
+    [SupplyParameterFromForm(FormName = "createReview")]
     private Reviews Review { get; set; } = new();
 
     protected override async Task OnInitializedAsync()

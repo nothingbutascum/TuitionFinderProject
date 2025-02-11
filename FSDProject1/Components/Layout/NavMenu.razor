@@ -15,7 +15,12 @@
             <li><NavLink href="/bookings/create">Booking</NavLink></li>
             <li><NavLink href="/contact">Contact Us</NavLink></li>
 
-            @if (isAdmin)
+            @if (!isAdmin) // ✅ Show only if the user is NOT an admin
+            {
+                <li><NavLink href="/bookings/studentmanage">Manage Bookings</NavLink></li>
+            }
+
+            @if (isAdmin) // ✅ Show admin menu only for admins
             {
                 <li class="dropdown">
                     <span class="dropdown-toggle">Manage</span>
@@ -23,14 +28,16 @@
                         <li><NavLink href="/tutors">Manage Tutors</NavLink></li>
                         <li><NavLink href="/studentusers">Manage Students</NavLink></li>
                         <li><NavLink href="/bookings">Manage Bookings</NavLink></li>
-                        <li><NavLink href="/reviews">View Reviews</NavLink></li>
+                        <li><NavLink href="/subjects">Manage Subjects</NavLink></li>
                     </ul>
                 </li>
             }
         </ul>
+
     </nav>
 
     <AuthorizeView>
+        
         <Authorized>
             <div class="auth-buttons">
                 <NavLink href="Account/Manage" class="username">@context.User.Identity?.Name</NavLink>

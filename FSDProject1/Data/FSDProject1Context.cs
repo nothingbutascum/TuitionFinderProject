@@ -37,7 +37,7 @@ namespace FSDProject1.Data
                 .HasOne(s => s.Tutor)
                 .WithMany() // No back-reference needed
                 .HasForeignKey(s => s.TutorId)
-                .OnDelete(DeleteBehavior.Cascade); // 🔹 Ensures subjects are deleted when tutor is deleted
+                .OnDelete(DeleteBehavior.Restrict); // 🔹 Ensures subjects are deleted when tutor is deleted
 
             // ✅ One-to-Many Relationship (Bookings linked to Tutors)
             modelBuilder.Entity<Booking>()
@@ -45,17 +45,16 @@ namespace FSDProject1.Data
                 .WithMany() // No explicit navigation property in Tutor
                 .HasForeignKey(b => b.TutorId)
                 .OnDelete(DeleteBehavior.Cascade); // 🔹 Ensures bookings are deleted when tutor is deleted
-           // ✅ Enforce Unique Constraint on Bookings
-           
+                                                   // ✅ Enforce Unique Constraint on Bookings
 
-            // ✅ Many-to-Many Relationship (Subjects <-> Tutors)
+
             modelBuilder.Entity<Tutors>()
-                .HasMany(t => t.Subjects)
-                .WithMany(s => s.Tutors)
-                .UsingEntity<Dictionary<string, object>>(
-                    "TutorSubject",
-                    t => t.HasOne<Subjects>().WithMany().HasForeignKey("SubjectId"),
-                    s => s.HasOne<Tutors>().WithMany().HasForeignKey("TutorId"));
-        }
+             .HasMany(t => t.Subjects)
+             .WithMany(s => s.Tutors)
+             .UsingEntity<Dictionary<string, object>>(
+             "TutorSubject",
+             t => t.HasOne<Subjects>().WithMany().HasForeignKey("SubjectId").OnDelete(DeleteBehavior.Restrict),
+             s => s.HasOne<Tutors>().WithMany().HasForeignKey("TutorId").OnDelete(DeleteBehavior.Restrict));
+            }
     }
 }

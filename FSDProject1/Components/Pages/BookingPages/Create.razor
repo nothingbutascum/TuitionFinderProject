@@ -5,7 +5,6 @@
 @inject IDbContextFactory<FSDProject1.Data.FSDProject1Context> DbFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IJSRuntime JS
 @using System.Security.Claims
 @rendermode InteractiveServer
 
@@ -24,7 +23,7 @@
 
 <div class="row">
     <div class="col-md-4">
-        <EditForm Model="Booking" OnValidSubmit="ShowConfirmationModal" FormName="createBooking">
+        <EditForm Model="Booking" OnValidSubmit="ShowConfirmationPopup" FormName="createBooking">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
 
@@ -77,32 +76,27 @@
     </div>
 </div>
 
-<!-- Back Link -->
 <div>
-    
+    <a href="/bookings">Back to List</a>
 </div>
 
-<!-- Bootstrap Modal for Confirmation -->
-<div class="modal fade" id="bookingConfirmationModal" tabindex="-1" aria-labelledby="bookingConfirmationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="bookingConfirmationModalLabel">Confirm Your Booking</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Subject:</strong> @SelectedSubjectName</p>
-                <p><strong>Tutor:</strong> @SelectedTutorName</p>
-                <p><strong>Date:</strong> @Booking.Date.ToShortDateString()</p>
-                <p><strong>Time:</strong> @Booking.Time</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" @onclick="ConfirmBooking">Confirm</button>
+<!-- Simple Blazor Pop-up for Confirmation -->
+@if (ShowPopup)
+{
+    <div class="popup-overlay">
+        <div class="popup-content">
+            <h5>Confirm Your Booking</h5>
+            <p><strong>Subject:</strong> @SelectedSubjectName</p>
+            <p><strong>Tutor:</strong> @SelectedTutorName</p>
+            <p><strong>Date:</strong> @Booking.Date.ToShortDateString()</p>
+            <p><strong>Time:</strong> @Booking.Time</p>
+            <div class="popup-buttons">
+                <button class="btn btn-secondary" @onclick="ClosePopup">Cancel</button>
+                <button class="btn btn-primary" @onclick="ConfirmBooking">Confirm</button>
             </div>
         </div>
     </div>
-</div>
+}
 
 @code {
     private List<Tutors> Tutors { get; set; } = new();
@@ -112,6 +106,7 @@
     private StudentUser StudentUser { get; set; } = new();
     private string SelectedSubjectName { get; set; } = "";
     private string SelectedTutorName { get; set; } = "";
+    private bool ShowPopup { get; set; } = false;
 
     private List<string> AvailableTimeSlots = new()
     {
@@ -156,7 +151,7 @@
         }
     }
 
-    private void ShowConfirmationModal()
+    private void ShowConfirmationPopup()
     {
         var subject = Subjects.FirstOrDefault(s => s.SubjectId == SelectedSubjectId);
         var tutor = Tutors.FirstOrDefault(t => t.TutorId == SelectedTutorId);
@@ -164,13 +159,18 @@
         SelectedSubjectName = subject?.Name ?? "N/A";
         SelectedTutorName = tutor?.Name ?? "N/A";
 
-        JS.InvokeVoidAsync("bootstrapModalShow", "bookingConfirmationModal");
+        ShowPopup = true;
+    }
+
+    private void ClosePopup()
+    {
+        ShowPopup = false;
     }
 
     private async Task ConfirmBooking()
     {
+        ShowPopup = false;
         await AddBooking();
-        JS.InvokeVoidAsync("bootstrapModalHide", "bookingConfirmationModal");
     }
 
     private async Task AddBooking()
@@ -190,7 +190,6 @@
         var userEmail = user.FindFirst(ClaimTypes.Email)?.Value;
         Booking.StudentUserId = studentUsers.FirstOrDefault(s => s.Email == userEmail)?.StudentUserId ?? 0;
 
-
         if (bookings.Any(b => b.TutorId == Booking.TutorId && b.Time == Booking.Time && b.Date.Date == Booking.Date.Date))
         {
             DuplicateBookingMessage = "❌ This time slot is already booked. Please select a different time.";
@@ -206,6 +205,6 @@
         context.Booking.Add(Booking);
         await context.SaveChangesAsync();
 
-        NavigationManager.NavigateTo("/bookings");
+        NavigationManager.NavigateTo("/bookings/studentmanage");
     }
 }

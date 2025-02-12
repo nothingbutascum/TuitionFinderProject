@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FSDProject1.Migrations
 {
     [DbContext(typeof(FSDProject1Context))]
-    [Migration("20250131093653_Studentchangenonnullable")]
-    partial class Studentchangenonnullable
+    [Migration("20250212020110_Start")]
+    partial class Start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,13 +105,12 @@ namespace FSDProject1.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdminTutorId"));
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("DateCreated")
+                    b.Property<DateOnly?>("DateCreated")
                         .HasColumnType("date");
 
-                    b.Property<DateTime>("DateUpdated")
+                    b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("SubjectId")
@@ -121,7 +120,6 @@ namespace FSDProject1.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AdminTutorId");
@@ -193,10 +191,11 @@ namespace FSDProject1.Migrations
                     b.Property<int>("StudentUserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Time")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TutorID")
+                    b.Property<int>("TutorId")
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
@@ -207,7 +206,7 @@ namespace FSDProject1.Migrations
 
                     b.HasIndex("StudentUserId");
 
-                    b.HasIndex("TutorID");
+                    b.HasIndex("TutorId");
 
                     b.ToTable("Booking");
 
@@ -221,8 +220,8 @@ namespace FSDProject1.Migrations
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Confirmed",
                             StudentUserId = 1,
-                            Time = new DateTime(2025, 1, 10, 10, 0, 0, 0, DateTimeKind.Unspecified),
-                            TutorID = 1,
+                            Time = "10:00",
+                            TutorId = 1,
                             UpdatedBy = "SystemAdmin"
                         },
                         new
@@ -234,8 +233,8 @@ namespace FSDProject1.Migrations
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Pending",
                             StudentUserId = 2,
-                            Time = new DateTime(2025, 1, 11, 14, 0, 0, 0, DateTimeKind.Unspecified),
-                            TutorID = 2,
+                            Time = "14:00",
+                            TutorId = 2,
                             UpdatedBy = "AdminUser"
                         },
                         new
@@ -247,8 +246,8 @@ namespace FSDProject1.Migrations
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Cancelled",
                             StudentUserId = 3,
-                            Time = new DateTime(2025, 1, 12, 16, 0, 0, 0, DateTimeKind.Unspecified),
-                            TutorID = 3,
+                            Time = "16:00",
+                            TutorId = 3,
                             UpdatedBy = "AdminAssistant"
                         });
                 });
@@ -265,20 +264,18 @@ namespace FSDProject1.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateUpdated")
+                    b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Rating")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ReviewsId");
@@ -331,11 +328,10 @@ namespace FSDProject1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentUserId"));
 
-                    b.Property<int>("Age")
+                    b.Property<int?>("Age")
                         .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateCreated")
@@ -345,15 +341,12 @@ namespace FSDProject1.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentUserId");
@@ -405,24 +398,21 @@ namespace FSDProject1.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectId"));
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateUpdated")
+                    b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TutorId")
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectId");
@@ -449,7 +439,7 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Physics",
-                            TutorId = 2,
+                            TutorId = 1,
                             UpdatedBy = "AdminUser"
                         },
                         new
@@ -473,38 +463,33 @@ namespace FSDProject1.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TutorId"));
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateUpdated")
+                    b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Experience")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("HourlyRate")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("HourlyRate")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Qualification")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
 
                     b.Property<int?>("StudentUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TutorId");
@@ -521,10 +506,10 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Experience = "10 years of teaching experience",
-                            HourlyRate = 50.00m,
+                            HourlyRate = 50,
                             Name = "Dr. John Smith",
                             Qualification = "PhD in Mathematics",
-                            Rating = 4.8m,
+                            Rating = 4,
                             StudentUserId = 1,
                             UpdatedBy = "SystemAdmin"
                         },
@@ -535,10 +520,10 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Experience = "8 years of tutoring experience",
-                            HourlyRate = 45.00m,
+                            HourlyRate = 45,
                             Name = "Ms. Jane Doe",
                             Qualification = "Master's in Physics",
-                            Rating = 4.6m,
+                            Rating = 4,
                             StudentUserId = 2,
                             UpdatedBy = "AdminUser"
                         },
@@ -549,10 +534,10 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Experience = "15 years of academic experience",
-                            HourlyRate = 60.00m,
+                            HourlyRate = 60,
                             Name = "Prof. Alice Brown",
                             Qualification = "PhD in Chemistry",
-                            Rating = 4.9m,
+                            Rating = 4,
                             StudentUserId = 3,
                             UpdatedBy = "AdminAssistant"
                         });
@@ -691,6 +676,21 @@ namespace FSDProject1.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TutorSubject", b =>
+                {
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TutorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SubjectId", "TutorId");
+
+                    b.HasIndex("TutorId");
+
+                    b.ToTable("TutorSubject");
+                });
+
             modelBuilder.Entity("FSDProject1.Domain.AdminTutor", b =>
                 {
                     b.HasOne("FSDProject1.Domain.Subjects", "Subject")
@@ -720,8 +720,8 @@ namespace FSDProject1.Migrations
 
                     b.HasOne("FSDProject1.Domain.Tutors", "Tutor")
                         .WithMany()
-                        .HasForeignKey("TutorID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("StudentUser");
@@ -743,9 +743,9 @@ namespace FSDProject1.Migrations
             modelBuilder.Entity("FSDProject1.Domain.Subjects", b =>
                 {
                     b.HasOne("FSDProject1.Domain.Tutors", "Tutor")
-                        .WithMany("Subjects")
+                        .WithMany()
                         .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Tutor");
@@ -811,14 +811,24 @@ namespace FSDProject1.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TutorSubject", b =>
+                {
+                    b.HasOne("FSDProject1.Domain.Subjects", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FSDProject1.Domain.Tutors", null)
+                        .WithMany()
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FSDProject1.Domain.StudentUser", b =>
                 {
                     b.Navigation("Bookings");
-                });
-
-            modelBuilder.Entity("FSDProject1.Domain.Tutors", b =>
-                {
-                    b.Navigation("Subjects");
                 });
 #pragma warning restore 612, 618
         }

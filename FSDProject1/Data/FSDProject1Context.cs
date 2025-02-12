@@ -45,16 +45,22 @@ namespace FSDProject1.Data
                 .WithMany() // No explicit navigation property in Tutor
                 .HasForeignKey(b => b.TutorId)
                 .OnDelete(DeleteBehavior.Cascade); // 🔹 Ensures bookings are deleted when tutor is deleted
-                                                   // ✅ Enforce Unique Constraint on Bookings
 
-
+            // ✅ Many-to-Many Relationship (Subjects <-> Tutors)
             modelBuilder.Entity<Tutors>()
-             .HasMany(t => t.Subjects)
-             .WithMany(s => s.Tutors)
-             .UsingEntity<Dictionary<string, object>>(
-             "TutorSubject",
-             t => t.HasOne<Subjects>().WithMany().HasForeignKey("SubjectId").OnDelete(DeleteBehavior.Restrict),
-             s => s.HasOne<Tutors>().WithMany().HasForeignKey("TutorId").OnDelete(DeleteBehavior.Restrict));
-            }
+                .HasMany(t => t.Subjects)
+                .WithMany(s => s.Tutors)
+                .UsingEntity<Dictionary<string, object>>(
+                    "TutorSubject",
+                    t => t.HasOne<Subjects>().WithMany().HasForeignKey("SubjectId").OnDelete(DeleteBehavior.Restrict),
+                    s => s.HasOne<Tutors>().WithMany().HasForeignKey("TutorId").OnDelete(DeleteBehavior.Restrict));
+
+            // ✅ One-to-Many Relationship (Bookings linked to StudentUser)
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.StudentUser) // Booking has one StudentUser
+                .WithMany(su => su.Bookings) // StudentUser has many Bookings
+                .HasForeignKey(b => b.StudentUserId) // Foreign key in Booking
+                .OnDelete(DeleteBehavior.Cascade); // Optionally, add Cascade here if you want to delete bookings when StudentUser is deleted
+        }
     }
 }

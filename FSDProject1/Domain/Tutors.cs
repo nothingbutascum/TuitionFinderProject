@@ -16,9 +16,9 @@ namespace FSDProject1.Domain
 
         public string? Experience { get; set; } = string.Empty;
 
-        public decimal? HourlyRate { get; set; }
+        public int? HourlyRate { get; set; }
 
-        public decimal? Rating { get; set; }
+        public int? Rating { get; set; }
 
 
         public DateTime? DateCreated { get; set; }

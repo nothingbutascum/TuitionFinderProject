@@ -471,8 +471,8 @@ namespace FSDProject1.Migrations
                     b.Property<string>("Experience")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("HourlyRate")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("HourlyRate")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -480,8 +480,8 @@ namespace FSDProject1.Migrations
                     b.Property<string>("Qualification")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("Rating")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
 
                     b.Property<int?>("StudentUserId")
                         .HasColumnType("int");
@@ -503,10 +503,10 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Experience = "10 years of teaching experience",
-                            HourlyRate = 50.00m,
+                            HourlyRate = 50,
                             Name = "Dr. John Smith",
                             Qualification = "PhD in Mathematics",
-                            Rating = 4.8m,
+                            Rating = 4,
                             StudentUserId = 1,
                             UpdatedBy = "SystemAdmin"
                         },
@@ -517,10 +517,10 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Experience = "8 years of tutoring experience",
-                            HourlyRate = 45.00m,
+                            HourlyRate = 45,
                             Name = "Ms. Jane Doe",
                             Qualification = "Master's in Physics",
-                            Rating = 4.6m,
+                            Rating = 4,
                             StudentUserId = 2,
                             UpdatedBy = "AdminUser"
                         },
@@ -531,10 +531,10 @@ namespace FSDProject1.Migrations
                             DateCreated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             DateUpdated = new DateTime(2024, 1, 26, 12, 0, 0, 0, DateTimeKind.Utc),
                             Experience = "15 years of academic experience",
-                            HourlyRate = 60.00m,
+                            HourlyRate = 60,
                             Name = "Prof. Alice Brown",
                             Qualification = "PhD in Chemistry",
-                            Rating = 4.9m,
+                            Rating = 4,
                             StudentUserId = 3,
                             UpdatedBy = "AdminAssistant"
                         });
@@ -742,7 +742,7 @@ namespace FSDProject1.Migrations
                     b.HasOne("FSDProject1.Domain.Tutors", "Tutor")
                         .WithMany()
                         .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Tutor");
@@ -813,13 +813,13 @@ namespace FSDProject1.Migrations
                     b.HasOne("FSDProject1.Domain.Subjects", null)
                         .WithMany()
                         .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FSDProject1.Domain.Tutors", null)
                         .WithMany()
                         .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
